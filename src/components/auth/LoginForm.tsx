@@ -33,8 +33,8 @@ export const LoginForm = () => {
             {...register('email', {
               required: 'Correo requerido',
               pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/,
-                message: 'Debe ser un correo @fesc.edu.co'
+                value: /^[a-zA-Z0-9._%+-]+@fes\.edu\.co$/,
+                message: 'Debe ser un correo @fes.edu.co'
               }
             })}
             placeholder="Correo institucional"

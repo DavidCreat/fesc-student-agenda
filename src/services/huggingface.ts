@@ -1,10 +1,15 @@
 import axios from 'axios';
+import { config } from '../config';
 
-const API_TOKEN = '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';
+interface RecommendationResponse {
+  labels: string[];
+  scores: number[];
+  sequence: string;
+}
 
 export const getRecommendations = async (subjects: string[]) => {
   try {
-    const response = await axios.post(
+    const response = await axios.post<RecommendationResponse>(
       'https://api-inference.huggingface.co/models/facebook/bart-large-mnli',
       {
         inputs: subjects.join(', '),
@@ -21,19 +26,19 @@ export const getRecommendations = async (subjects: string[]) => {
       },
       {
         headers: {
-          'Authorization': `Bearer ${API_TOKEN}`,
+          'Authorization': `Bearer ${config.huggingFaceToken}`,
           'Content-Type': 'application/json',
         }
       }
     );
 
-    return response.data.labels.map((label: string, index: number) => ({
+    return response.data.labels.map((label, index) => ({
       type: label,
       confidence: response.data.scores[index],
       recommendation: `Recomendación para ${label}`
     }));
   } catch (error) {
     console.error('Error fetching recommendations:', error);
-    return [];
+    throw new Error('No se pudieron obtener las recomendaciones');
   }
 };

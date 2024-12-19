@@ -58,8 +58,8 @@ export const UserForm = () => {
           {...register('email', {
             required: true,
             pattern: {
-              value: /^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/,
-              message: 'Debe ser un correo institucional (@fesc.edu.co)'
+              value: /^[a-zA-Z0-9._%+-]+@fes\.edu\.co$/,
+              message: 'Debe ser un correo institucional (@fes.edu.co)'
             }
           })}
           className="w-full p-2 border rounded focus:border-red-500 focus:outline-none"
