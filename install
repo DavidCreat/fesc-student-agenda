@@ -1,0 +1,3 @@
+npm install ts-node --save-dev 
+
+npm run dev

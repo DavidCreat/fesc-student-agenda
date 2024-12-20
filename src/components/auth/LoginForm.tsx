@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';

@@ -1,11 +1,20 @@
+// src/components/Navigation.tsx
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, BookOpen, Clock } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Calendar, BookOpen, Clock, LogOut } from 'lucide-react';
+import { useAuthActions } from '../hooks/auth';
 
 export const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { handleLogout } = useAuthActions();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const onLogout = () => {
+    handleLogout();
+    navigate('/auth');
+  };
 
   return (
     <nav className="bg-red-600 text-white">
@@ -35,7 +44,7 @@ export const Navigation = () => {
               <BookOpen className="w-5 h-5 mr-2" />
               <span>Tareas</span>
             </Link>
-            
+
             <Link
               to="/session"
               className={`flex items-center ${isActive('/session') ? 'text-white' : 'text-red-200'}`}
@@ -44,6 +53,15 @@ export const Navigation = () => {
               <span>Sesión</span>
             </Link>
           </div>
+
+          {/* Botón de Logout */}
+          <button
+            onClick={onLogout}
+            className="flex items-center text-red-200 hover:text-white transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </div>
     </nav>

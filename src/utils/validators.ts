@@ -16,7 +16,7 @@ export const passwordValidator = z
 // Schema for user data
 export const userSchema = z.object({
   fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  career: z.enum(CAREERS as [string, ...string[]], {
+  career: z.enum(CAREERS as unknown as [string, ...string[]], {
     errorMap: () => ({ message: 'Selecciona una carrera válida' }),
   }),
   semester: z.number().min(1).max(10),

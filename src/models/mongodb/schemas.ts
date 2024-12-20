@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   email: { 
     type: String, 
     required: true,
-    match: /^[a-zA-Z0-9._%+-]+@fes\.edu\.co$/,
+    match: /^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/,
     unique: true
   },
   createdAt: { type: Date, default: Date.now },

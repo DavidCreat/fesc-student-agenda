@@ -20,9 +20,9 @@ export function useForm<T extends z.ZodType>(schema: T) {
     }
   };
 
-  const validate = (): data is FormData => {
+  const validate = (formData: Partial<FormData> = data): formData is FormData => {
     try {
-      schema.parse(data);
+      schema.parse(formData);
       setErrors({});
       return true;
     } catch (error) {

@@ -3,24 +3,15 @@ import { config } from './env';
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(config.mongoUri);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
+    const conn = await mongoose.connect(config.mongoUri, {
+      retryWrites: true,
+      w: 'majority',
+      dbName: 'fesc_agenda'
     });
-
-    mongoose.connection.on('disconnected', () => {
-      console.warn('MongoDB disconnected. Attempting to reconnect...');
-    });
-
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      process.exit(0);
-    });
+    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
+    console.log(`📦 Database: ${conn.connection.db.databaseName}`);
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('❌ Error:', error instanceof Error ? error.message : 'Unknown error occurred');
     process.exit(1);
   }
 };

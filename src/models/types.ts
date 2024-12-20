@@ -1,26 +1,40 @@
 export interface User {
+  _id: string;
   fullName: string;
+  email: string;
   career: string;
   semester: number;
   schedule: 'day' | 'night';
-  email: string;
 }
 
 export interface ScheduleEntry {
-  id: string;
-  day: string;
+  _id: string;
+  userId: string;
   subject: string;
   startTime: string;
   endTime: string;
+  date: string;
+  room?: string;
+  professor?: string;
 }
 
 export interface Task {
-  id: string;
-  subject: string;
+  _id: string;
+  userId: string;
   title: string;
   description: string;
-  dueDate: string;
   completed: boolean;
+  dueDate: string;
+  createdAt: string;
+}
+
+export interface SessionLog {
+  _id: string;
+  userId: string;
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  activity: string;
 }
 
 export interface Recommendation {

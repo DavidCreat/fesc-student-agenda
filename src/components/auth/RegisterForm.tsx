@@ -1,21 +1,36 @@
-import React from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UserPlus } from 'lucide-react';
-import { useForm } from '../../hooks/useForm';
-import { userSchema } from '../../utils/validation';
+import { useAuthActions } from '../../hooks/auth';
+import { RegisterData } from '../../services/auth';
 import { CAREERS } from '../../constants/careers';
 import { FormField } from '../common/FormField';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 
 export const RegisterForm = () => {
-  const { data, errors, handleChange, validate } = useForm(userSchema);
+  const { handleRegister, loading, error: authError } = useAuthActions();
+  const [formData, setFormData] = useState<Partial<RegisterData>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (field: keyof RegisterData, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpiar error del campo cuando cambia
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      // Handle registration
-      console.log('Form data:', data);
+    try {
+      await handleRegister(formData as RegisterData);
+    } catch (err) {
+      console.error('Register error:', err);
     }
   };
 
@@ -41,10 +56,16 @@ export const RegisterForm = () => {
         <h2 className="text-2xl font-bold text-gray-800">Registro</h2>
       </div>
 
+      {authError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          {authError}
+        </div>
+      )}
+
       <FormField label="Nombre completo" error={errors.fullName}>
         <Input
           type="text"
-          value={data.fullName || ''}
+          value={formData.fullName || ''}
           onChange={(e) => handleChange('fullName', e.target.value)}
           error={errors.fullName}
         />
@@ -52,7 +73,7 @@ export const RegisterForm = () => {
 
       <FormField label="Carrera" error={errors.career}>
         <Select
-          value={data.career || ''}
+          value={formData.career || ''}
           onChange={(e) => handleChange('career', e.target.value)}
           options={careerOptions}
           error={errors.career}
@@ -65,7 +86,7 @@ export const RegisterForm = () => {
             type="number"
             min={1}
             max={10}
-            value={data.semester || ''}
+            value={formData.semester || ''}
             onChange={(e) => handleChange('semester', parseInt(e.target.value))}
             error={errors.semester}
           />
@@ -73,8 +94,8 @@ export const RegisterForm = () => {
 
         <FormField label="Jornada" error={errors.schedule}>
           <Select
-            value={data.schedule || ''}
-            onChange={(e) => handleChange('schedule', e.target.value)}
+            value={formData.schedule || ''}
+            onChange={(e) => handleChange('schedule', e.target.value as 'day' | 'night')}
             options={scheduleOptions}
             error={errors.schedule}
           />
@@ -84,7 +105,7 @@ export const RegisterForm = () => {
       <FormField label="Correo institucional" error={errors.email}>
         <Input
           type="email"
-          value={data.email || ''}
+          value={formData.email || ''}
           onChange={(e) => handleChange('email', e.target.value)}
           placeholder="usuario@fesc.edu.co"
           error={errors.email}
@@ -94,7 +115,7 @@ export const RegisterForm = () => {
       <FormField label="Contraseña" error={errors.password}>
         <Input
           type="password"
-          value={data.password || ''}
+          value={formData.password || ''}
           onChange={(e) => handleChange('password', e.target.value)}
           error={errors.password}
         />
@@ -104,9 +125,10 @@ export const RegisterForm = () => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         type="submit"
-        className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
+        disabled={loading}
+        className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-red-400"
       >
-        Registrarse
+        {loading ? 'Registrando...' : 'Registrarse'}
       </motion.button>
     </motion.form>
   );
