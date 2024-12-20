@@ -8,7 +8,7 @@ export const emailSchema = z
 
 export const userSchema = z.object({
   fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  career: z.enum(CAREERS as [string, ...string[]], {
+  career: z.enum(CAREERS as unknown as [string, ...string[]], {
     errorMap: () => ({ message: 'Selecciona una carrera válida' }),
   }),
   semester: z.number().min(1).max(10),
@@ -36,3 +36,9 @@ export const scheduleEntrySchema = z.object({
     path: ['startTime'],
   }
 );
+
+export const validateScheduleTime = (startTime: string, endTime: string): boolean => {
+  const start = new Date(`1970-01-01T${startTime}`);
+  const end = new Date(`1970-01-01T${endTime}`);
+  return start < end;
+};

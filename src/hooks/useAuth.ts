@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { authService, LoginCredentials } from '../services/auth';
-import { User } from '../models/types';
+import { authService, LoginCredentials, RegisterData } from '../services/auth';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ export const useAuth = () => {
     }
   };
 
-  const handleRegister = async (userData: Partial<User> & { password: string }) => {
+  const handleRegister = async (userData: RegisterData) => {
     try {
       setError(null);
       setLoading(true);

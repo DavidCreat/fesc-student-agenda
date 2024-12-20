@@ -1,9 +1,16 @@
-// src/hooks/auth/useAuthActions.ts
 import { useState } from 'react';
-import { useStore } from '../../store/useStore';
-import { authService, RegisterData, LoginCredentials } from '../../services/auth';
+import { useStore } from '../store/useStore';
+import { authService, RegisterData, LoginCredentials } from '../services/auth';
 
-export const useAuthActions = () => {
+export function useAuthState() {
+  const user = useStore((state) => state.user);
+  return {
+    user,
+    isAuthenticated: !!user
+  };
+}
+
+export function useAuthActions() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const setUser = useStore((state) => state.setUser);
@@ -53,4 +60,4 @@ export const useAuthActions = () => {
     error,
     isAuthenticated: authService.isAuthenticated()
   };
-};
+} 

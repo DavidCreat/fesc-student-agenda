@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation } from '../components/Navigation';
 import { Dashboard } from '../components/Dashboard';
@@ -29,21 +28,9 @@ export const AppRoutes = () => {
       <Navigation />
       <main className="container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } />
-          <Route path="/schedule" element={
-            <PrivateRoute>
-              <SchedulePage />
-            </PrivateRoute>
-          } />
-          <Route path="/tasks" element={
-            <PrivateRoute>
-              <TasksPage />
-            </PrivateRoute>
-          } />
+          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/schedule" element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
+          <Route path="/tasks" element={<PrivateRoute><TasksPage /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

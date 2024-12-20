@@ -3,24 +3,31 @@ import { useForm } from 'react-hook-form';
 import { useStore } from '../store/useStore';
 
 interface TaskFormData {
-  subject: string;
   title: string;
   description: string;
   dueDate: string;
+  subject: string;
   priority: 'low' | 'medium' | 'high';
 }
 
 export const TaskForm = () => {
-  const { register, handleSubmit, reset } = useForm<TaskFormData>();
-  const addTask = useStore((state) => state.addTask);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskFormData>();
+  const { user, createTask } = useStore();
 
-  const onSubmit = (data: TaskFormData) => {
-    addTask({
-      ...data,
-      id: Date.now().toString(),
-      completed: false,
-    });
-    reset();
+  const onSubmit = async (data: TaskFormData) => {
+    if (!user?._id) return;
+    
+    try {
+      await createTask({
+        ...data,
+        userId: user._id,
+        completed: false,
+        createdAt: new Date().toISOString()
+      });
+      reset();
+    } catch (error) {
+      console.error('Error al crear la tarea:', error);
+    }
   };
 
   return (
@@ -31,24 +38,27 @@ export const TaskForm = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">Materia</label>
           <input
-            {...register('subject', { required: true })}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm"
+            {...register('subject', { required: 'La materia es requerida' })}
+            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+            autoComplete="off"
           />
+          {errors.subject && <span className="text-red-500 text-sm">{errors.subject.message}</span>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Título</label>
           <input
-            {...register('title', { required: true })}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm"
+            {...register('title', { required: 'El título es requerido' })}
+            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
           />
+          {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Descripción</label>
           <textarea
             {...register('description')}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm"
+            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
             rows={3}
           />
         </div>
@@ -57,16 +67,17 @@ export const TaskForm = () => {
           <label className="block text-sm font-medium text-gray-700">Fecha de Entrega</label>
           <input
             type="date"
-            {...register('dueDate', { required: true })}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm"
+            {...register('dueDate', { required: 'La fecha de entrega es requerida' })}
+            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
           />
+          {errors.dueDate && <span className="text-red-500 text-sm">{errors.dueDate.message}</span>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Prioridad</label>
           <select
             {...register('priority')}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm"
+            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
           >
             <option value="low">Baja</option>
             <option value="medium">Media</option>
