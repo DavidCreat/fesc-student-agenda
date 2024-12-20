@@ -2,18 +2,19 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+import { useAuthActions } from '../../hooks/auth';
+import { LoginCredentials } from '../../services/auth';
 
 export const LoginForm = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginCredentials>();
+  const { handleLogin, loading, error } = useAuthActions();
 
-  const onSubmit = async (data: LoginFormData) => {
-    // TODO: Implement login logic with MongoDB
-    console.log(data);
+  const onSubmit = async (data: LoginCredentials) => {
+    try {
+      await handleLogin(data);
+    } catch (err) {
+      console.error('Login error:', err);
+    }
   };
 
   return (
@@ -27,14 +28,20 @@ export const LoginForm = () => {
         <h2 className="text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
       </div>
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <input
             {...register('email', {
               required: 'Correo requerido',
               pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@fes\.edu\.co$/,
-                message: 'Debe ser un correo @fes.edu.co'
+                value: /^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/,
+                message: 'Debe ser un correo @fesc.edu.co'
               }
             })}
             placeholder="Correo institucional"
@@ -61,9 +68,10 @@ export const LoginForm = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
+          disabled={loading}
+          className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-red-400"
         >
-          Ingresar
+          {loading ? 'Iniciando sesión...' : 'Ingresar'}
         </motion.button>
       </form>
     </motion.div>

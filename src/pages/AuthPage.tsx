@@ -4,9 +4,16 @@ import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { AuthNavigation } from '../components/auth/AuthNavigation';
 import { GraduationCap } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
+import { useAuthState } from '../hooks/auth';
 
 export const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { user } = useAuthState();
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-700 flex flex-col items-center justify-center p-4">
