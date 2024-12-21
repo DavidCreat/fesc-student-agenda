@@ -8,10 +8,13 @@ interface AppState {
   user: User | null;
   tasks: Task[];
   schedule: ScheduleEntry[];
+  sessionStartTime: number | null;
   setUser: (user: User | null) => void;
   createTask: (task: Omit<Task, '_id'>) => Promise<void>;
   createScheduleEntry: (entry: Omit<ScheduleEntry, '_id'>) => Promise<void>;
   toggleTaskComplete: (taskId: string) => Promise<void>;
+  startSession: () => void;
+  endSession: () => void;
   initialize: () => Promise<void>;
 }
 
@@ -21,8 +24,11 @@ export const useStore = create<AppState>()(
       user: null,
       tasks: [],
       schedule: [],
+      sessionStartTime: null,
 
       setUser: (user) => set({ user }),
+      startSession: () => set({ sessionStartTime: Date.now() }),
+      endSession: () => set({ sessionStartTime: null }),
 
       initialize: async () => {
         try {
@@ -82,7 +88,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'app-storage',
-      partialize: (state) => ({ user: state.user })
+      partialize: (state) => ({ user: state.user, sessionStartTime: state.sessionStartTime })
     }
   )
 );

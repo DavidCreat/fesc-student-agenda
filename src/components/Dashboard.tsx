@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, Book, Calendar } from 'lucide-react';
 import { useStore } from '../store/useStore';
 

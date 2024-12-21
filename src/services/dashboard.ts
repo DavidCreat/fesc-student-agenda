@@ -1,60 +1,58 @@
 // src/services/dashboard.ts
-import axios from 'axios';
+import { api } from './api/axios';
 import type { Task, ScheduleEntry, SessionLog } from '../models/types';
 
 class DashboardService {
-  private api = axios.create({
-    baseURL: import.meta.env.DEV ? '/api' : '/api',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  constructor() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.setAuthHeader(token);
-    }
-  }
-
-  private setAuthHeader(token: string) {
-    this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-
-  // Tasks
   async getTasks(userId: string): Promise<Task[]> {
-    const response = await this.api.get(`/tasks/user/${userId}`);
+    const response = await api.get(`/tasks/${userId}`);
     return response.data;
   }
 
   async createTask(task: Omit<Task, '_id'>): Promise<Task> {
-    const response = await this.api.post('/tasks', task);
+    const response = await api.post('/tasks', task);
     return response.data;
   }
 
   async updateTask(taskId: string, update: Partial<Task>): Promise<Task> {
-    const response = await this.api.put(`/tasks/${taskId}`, update);
+    const response = await api.patch(`/tasks/${taskId}`, update);
     return response.data;
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    await this.api.delete(`/tasks/${taskId}`);
+    await api.delete(`/tasks/${taskId}`);
   }
 
-  // Schedule Entries
   async getSchedule(userId: string): Promise<ScheduleEntry[]> {
-    const response = await this.api.get(`/schedule/user/${userId}`);
+    const response = await api.get(`/schedule/${userId}`);
     return response.data;
   }
 
   async createScheduleEntry(entry: Omit<ScheduleEntry, '_id'>): Promise<ScheduleEntry> {
-    const response = await this.api.post('/schedule', entry);
+    const response = await api.post('/schedule', entry);
     return response.data;
   }
 
-  // Session Logs
+  async updateScheduleEntry(entryId: string, update: Partial<ScheduleEntry>): Promise<ScheduleEntry> {
+    const response = await api.patch(`/schedule/${entryId}`, update);
+    return response.data;
+  }
+
+  async deleteScheduleEntry(entryId: string): Promise<void> {
+    await api.delete(`/schedule/${entryId}`);
+  }
+
+  async getSessionLogs(userId: string): Promise<SessionLog[]> {
+    const response = await api.get(`/sessions/${userId}`);
+    return response.data;
+  }
+
   async createSessionLog(log: Omit<SessionLog, '_id'>): Promise<SessionLog> {
-    const response = await this.api.post('/sessions', log);
+    const response = await api.post('/sessions', log);
+    return response.data;
+  }
+
+  async updateSessionLog(logId: string, update: Partial<SessionLog>): Promise<SessionLog> {
+    const response = await api.patch(`/sessions/${logId}`, update);
     return response.data;
   }
 }

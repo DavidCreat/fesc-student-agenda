@@ -1,9 +1,7 @@
 import axios from 'axios';
-import { config } from '../../config/env';
 
-// Create axios instance with default config
 export const api = axios.create({
-  baseURL: config.isProduction ? '/api' : 'http://localhost:3000/api',
+  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },

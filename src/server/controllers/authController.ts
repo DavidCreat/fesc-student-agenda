@@ -1,13 +1,18 @@
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../../config/env';
 import { User } from '../../models/User';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_EXPIRE = process.env.JWT_EXPIRE || '24h';
 
 const generateToken = (id: unknown) => {
   if (id instanceof mongoose.Types.ObjectId || typeof id === 'string') {
-    return jwt.sign({ id: id.toString() }, config.jwtSecret, {
-      expiresIn: '24h'
+    return jwt.sign({ id: id.toString() }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE
     });
   }
   throw new Error('Invalid ID type');
@@ -15,28 +20,16 @@ const generateToken = (id: unknown) => {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ email: req.body.email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'El correo ya está registrado'
-      });
-    }
-
-    // Crear el usuario
-    const user = await User.create({
-      ...req.body,
-      email: req.body.email.toLowerCase() // Normalizar email
+    const user = await User.create(req.body);
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE
     });
-
-    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         fullName: user.fullName,
         email: user.email,
         career: user.career,
@@ -45,7 +38,6 @@ export const register = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error en registro:', error);
     res.status(400).json({
       success: false,
       message: error instanceof Error ? error.message : 'Error al registrar usuario'
@@ -56,22 +48,32 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password');
 
-    if (!user || !(await user.matchPassword(password))) {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Correo o contraseña incorrectos'
+        message: 'Credenciales inválidas'
       });
     }
 
-    const token = generateToken(user._id);
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales inválidas'
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE
+    });
 
     res.json({
       success: true,
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         fullName: user.fullName,
         email: user.email,
         career: user.career,
@@ -80,7 +82,7 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Error al iniciar sesión'
     });
