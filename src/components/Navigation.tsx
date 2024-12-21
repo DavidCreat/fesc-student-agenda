@@ -1,67 +1,104 @@
 // src/components/Navigation.tsx
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import { useState } from 'react';
 import { Home, Calendar, BookOpen, Clock, LogOut } from 'lucide-react';
-import { useAuthActions } from '../hooks/auth';
 
 export const Navigation = () => {
-  const location = useLocation();
+  const user = useStore((state) => state.user);
+  const setUser = useStore((state) => state.setUser);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { handleLogout } = useAuthActions();
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const onLogout = () => {
-    handleLogout();
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
     navigate('/auth');
   };
 
+  // Si no hay usuario, no renderizamos la navegación
+  if (!user) return null;
+
   return (
-    <nav className="bg-red-600 text-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between h-16">
-          <div className="flex space-x-8">
-            <Link
-              to="/"
-              className={`flex items-center ${isActive('/') ? 'text-white' : 'text-red-200'}`}
-            >
-              <Home className="w-5 h-5 mr-2" />
+    <nav className="bg-red-600 text-white fixed top-0 left-0 right-0 z-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between h-14 px-4">
+          {/* Botón de menú móvil */}
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            className="sm:hidden flex items-center"
+          >
+            <span className={`transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+          </button>
+
+          {/* Enlaces para desktop */}
+          <div className="hidden sm:flex items-center space-x-4">
+            <Link to="/" className="flex items-center space-x-1 py-2">
+              <Home className="w-5 h-5" />
               <span>Inicio</span>
             </Link>
-            
-            <Link
-              to="/schedule"
-              className={`flex items-center ${isActive('/schedule') ? 'text-white' : 'text-red-200'}`}
-            >
-              <Calendar className="w-5 h-5 mr-2" />
+            <Link to="/schedule" className="flex items-center space-x-1 py-2">
+              <Calendar className="w-5 h-5" />
               <span>Horario</span>
             </Link>
-            
-            <Link
-              to="/tasks"
-              className={`flex items-center ${isActive('/tasks') ? 'text-white' : 'text-red-200'}`}
-            >
-              <BookOpen className="w-5 h-5 mr-2" />
+            <Link to="/tasks" className="flex items-center space-x-1 py-2">
+              <BookOpen className="w-5 h-5" />
               <span>Tareas</span>
             </Link>
-
-            <Link
-              to="/session"
-              className={`flex items-center ${isActive('/session') ? 'text-white' : 'text-red-200'}`}
-            >
-              <Clock className="w-5 h-5 mr-2" />
+            <Link to="/session" className="flex items-center space-x-1 py-2">
+              <Clock className="w-5 h-5" />
               <span>Sesión</span>
             </Link>
           </div>
 
-          {/* Botón de Logout */}
-          <button
-            onClick={onLogout}
-            className="flex items-center text-red-200 hover:text-white transition-colors"
-          >
-            <LogOut className="w-5 h-5 mr-2" />
-            <span>Cerrar Sesión</span>
-          </button>
+          {/* Botón de logout */}
+          <div className="flex items-center">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-1 py-2"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="hidden sm:inline">Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Menú móvil */}
+        <div className={`sm:hidden ${isOpen ? 'block' : 'hidden'} pb-4 bg-red-600`}>
+          <div className="flex flex-col space-y-2 px-4">
+            <Link 
+              to="/"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <Home className="w-5 h-5" />
+              <span>Inicio</span>
+            </Link>
+            <Link 
+              to="/schedule"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <Calendar className="w-5 h-5" />
+              <span>Horario</span>
+            </Link>
+            <Link 
+              to="/tasks"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <BookOpen className="w-5 h-5" />
+              <span>Tareas</span>
+            </Link>
+            <Link 
+              to="/session"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <Clock className="w-5 h-5" />
+              <span>Sesión</span>
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

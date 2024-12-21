@@ -17,3 +17,4 @@ export const formatDate = (date: string | Date): string => {
 
 export const formatTime = (time: string): string => {
   return format(parseISO(`1970-01-01T${time}`), 'h:mm a');
+};

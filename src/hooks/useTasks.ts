@@ -4,21 +4,17 @@ import type { Task } from '../models/types';
 
 export const useTasks = () => {
   const [error, setError] = useState<string | null>(null);
-  const addTask = useStore((state) => state.addTask);
+  const createTask = useStore((state) => state.createTask);
   const toggleTaskComplete = useStore((state) => state.toggleTaskComplete);
   const tasks = useStore((state) => state.tasks);
 
-  const handleAddTask = async (taskData: Omit<Task, 'id' | 'completed'>) => {
+  const handleAddTask = async (taskData: Omit<Task, '_id' | 'completed'>) => {
     try {
       setError(null);
-
-      const newTask = {
+      await createTask({
         ...taskData,
-        id: Date.now().toString(),
         completed: false,
-      };
-
-      addTask(newTask);
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al agregar tarea');
       throw err;

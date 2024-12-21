@@ -23,6 +23,7 @@ export interface Task {
   userId: string;
   title: string;
   description: string;
+  subject: string;
   completed: boolean;
   dueDate: string;
   createdAt: string;

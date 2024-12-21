@@ -1,6 +1,4 @@
-import React from 'react';
 import { useStore } from '../store/useStore';
-import { Task } from '../models/types';
 
 export const TaskList = () => {
   const tasks = useStore((state) => state.tasks);
@@ -15,11 +13,11 @@ export const TaskList = () => {
       <h2 className="text-2xl font-bold text-red-600 mb-4">Tareas Pendientes</h2>
       <div className="space-y-4">
         {sortedTasks.map((task) => (
-          <div key={task.id} className="flex items-center p-3 border rounded hover:bg-gray-50">
+          <div key={task._id} className="flex items-center p-3 border rounded hover:bg-gray-50">
             <input
               type="checkbox"
               checked={task.completed}
-              onChange={() => toggleTaskComplete(task.id)}
+              onChange={() => toggleTaskComplete(task._id)}
               className="mr-3"
             />
             <div className="flex-1">

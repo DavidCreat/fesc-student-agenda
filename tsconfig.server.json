@@ -1,14 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "CommonJS",
     "outDir": "dist",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true
+    "noEmit": false,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/*"]
+    }
   },
-  "include": ["src/server/**/*", "src/config/**/*", "src/models/**/*"],
-  "exclude": ["src/client/**/*"]
+  "include": ["src/server/**/*", "src/models/**/*", "src/config/**/*"],
+  "exclude": ["node_modules"]
 } 
