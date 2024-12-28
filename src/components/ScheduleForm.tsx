@@ -1,103 +1,147 @@
 import { useForm } from 'react-hook-form';
-import { useStore } from '../store/useStore';
+import { CreateScheduleEntryDTO } from '../models/types';
+import { FormField } from './common/FormField';
+import { Button } from './common/Button';
+import { Select } from './common/Select';
+import { CLASSROOMS } from '../constants/classrooms';
+import { useScheduleActions } from '../hooks/schedule/useScheduleActions';
+import { Input } from './common/Input';
 
-interface ScheduleFormData {
-  subject: string;
-  startTime: string;
-  endTime: string;
-  date: string;
-  room?: string;
-  professor?: string;
-}
+const DAYS_OF_WEEK = [
+  { value: 'monday', label: 'Lunes' },
+  { value: 'tuesday', label: 'Martes' },
+  { value: 'wednesday', label: 'Miércoles' },
+  { value: 'thursday', label: 'Jueves' },
+  { value: 'friday', label: 'Viernes' },
+  { value: 'saturday', label: 'Sábado' }
+];
 
 export const ScheduleForm = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ScheduleFormData>();
-  const { user, createScheduleEntry } = useStore();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateScheduleEntryDTO>();
+  const { createSchedule, loading, error } = useScheduleActions();
 
-  const onSubmit = async (data: ScheduleFormData) => {
-    if (!user?._id) return;
-    
+  const onSubmit = async (data: CreateScheduleEntryDTO) => {
     try {
-      await createScheduleEntry({
-        ...data,
-        userId: user._id
-      });
+      await createSchedule(data);
       reset();
+      alert('Clase agregada exitosamente');
     } catch (error) {
-      console.error('Error al crear la entrada de horario:', error);
+      console.error('Error en formulario:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-red-600 mb-4">Nueva Clase</h2>
-      
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Materia</label>
-          <input
-            {...register('subject', { required: 'La materia es requerida' })}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            autoComplete="off"
-          />
-          {errors.subject && <span className="text-red-500 text-sm">{errors.subject.message}</span>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow">
+      <h2 className="text-xl font-bold text-gray-800">Agregar Clase</h2>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          {error}
         </div>
+      )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
-            <input
-              type="time"
-              {...register('startTime', { required: 'La hora de inicio es requerida' })}
-              className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            />
-            {errors.startTime && <span className="text-red-500 text-sm">{errors.startTime.message}</span>}
-          </div>
+      <FormField
+        label="Materia"
+        type="text"
+        {...register('subject', { 
+          required: 'La materia es requerida',
+          minLength: { value: 3, message: 'Mínimo 3 caracteres' }
+        })}
+        error={errors.subject?.message}
+      >
+        <Input
+          {...register('subject', { required: 'La materia es requerida' })}
+          placeholder="Materia"
+        />
+      </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Hora de Fin</label>
-            <input
-              type="time"
-              {...register('endTime', { required: 'La hora de fin es requerida' })}
-              className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            />
-            {errors.endTime && <span className="text-red-500 text-sm">{errors.endTime.message}</span>}
-          </div>
-        </div>
+      <FormField
+        label="Profesor"
+        type="text"
+        {...register('professor', { 
+          required: 'El profesor es requerido',
+          minLength: { value: 3, message: 'Mínimo 3 caracteres' }
+        })}
+        error={errors.professor?.message}
+      >
+        <Input
+          {...register('professor', { required: 'El profesor es requerido' })}
+          placeholder="Profesor"
+        />
+      </FormField>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Fecha</label>
-          <input
-            type="date"
-            {...register('date', { required: 'La fecha es requerida' })}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-          />
-          {errors.date && <span className="text-red-500 text-sm">{errors.date.message}</span>}
-        </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Select
+          label="Día"
+          options={DAYS_OF_WEEK}
+          {...register('dayOfWeek', { required: 'Seleccione un día' })}
+          error={errors.dayOfWeek?.message}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Salón</label>
-          <input
-            {...register('room')}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Profesor</label>
-          <input
-            {...register('professor')}
-            className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
-        >
-          Agregar Clase
-        </button>
+        <Select
+          label="Salón"
+          options={CLASSROOMS}
+          {...register('room', { required: 'Seleccione un salón' })}
+          error={errors.room?.message}
+        />
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          type="time"
+          label="Hora inicio"
+          {...register('startTime', { required: 'La hora de inicio es requerida' })}
+          error={errors.startTime?.message}
+        >
+          <Input
+            {...register('startTime', { required: 'La hora de inicio es requerida' })}
+            type="time"
+            placeholder="Hora inicio"
+          />
+        </FormField>
+
+        <FormField
+          type="time"
+          label="Hora fin"
+          {...register('endTime', { required: 'La hora de fin es requerida' })}
+          error={errors.endTime?.message}
+        >
+          <Input
+            {...register('endTime', { required: 'La hora de fin es requerida' })}
+            type="time"
+            placeholder="Hora fin"
+          />
+        </FormField>
+      </div>
+
+      <FormField
+        type="number"
+        label="Semestre"
+        {...register('semester', { 
+          required: 'El semestre es requerido',
+          min: { value: 1, message: 'Mínimo semestre 1' },
+          max: { value: 10, message: 'Máximo semestre 10' }
+        })}
+        error={errors.semester?.message}
+      >
+        <Input
+          {...register('semester', { 
+            required: 'El semestre es requerido',
+            min: { value: 1, message: 'Mínimo semestre 1' },
+            max: { value: 10, message: 'Máximo semestre 10' }
+          })}
+          type="number"
+          placeholder="Semestre"
+        />
+      </FormField>
+
+      <Button 
+        type="submit" 
+        variant="primary"
+        disabled={loading}
+      >
+        {loading ? 'Agregando...' : 'Agregar Clase'}
+      </Button>
     </form>
   );
 };

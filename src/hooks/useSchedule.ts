@@ -5,8 +5,10 @@ import type { ScheduleEntry } from '../models/types';
 
 export const useSchedule = () => {
   const [error, setError] = useState<string | null>(null);
-  const createScheduleEntry = useStore((state) => state.createScheduleEntry);
-  const schedule = useStore((state) => state.schedule);
+  const schedules = useStore((state) => state.schedules) || [];
+  const { createSchedule } = useStore((state) => ({
+    createSchedule: state.createSchedule
+  }));
 
   const handleAddEntry = async (entry: Omit<ScheduleEntry, '_id'>) => {
     try {
@@ -17,8 +19,8 @@ export const useSchedule = () => {
       }
 
       // Check for schedule conflicts
-      const hasConflict = schedule.some((existingEntry) => {
-        return existingEntry.date === entry.date &&
+      const hasConflict = schedules.some((existingEntry) => {
+        return existingEntry.dayOfWeek === entry.dayOfWeek &&
           ((entry.startTime >= existingEntry.startTime && entry.startTime < existingEntry.endTime) ||
            (entry.endTime > existingEntry.startTime && entry.endTime <= existingEntry.endTime));
       });
@@ -27,7 +29,7 @@ export const useSchedule = () => {
         throw new Error('Ya existe una clase programada en este horario');
       }
 
-      await createScheduleEntry(entry);
+      await createSchedule(entry);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al agregar horario');
       throw err;
@@ -37,6 +39,6 @@ export const useSchedule = () => {
   return {
     error,
     handleAddEntry,
-    schedule,
+    schedules,
   };
 };

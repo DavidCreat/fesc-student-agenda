@@ -5,6 +5,7 @@ interface FormFieldProps {
   label: string;
   error?: string;
   children: React.ReactNode;
+  type?: string;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({ label, error, children }) => {

@@ -7,6 +7,7 @@ interface TaskFormData {
   dueDate: string;
   subject: string;
   priority: 'low' | 'medium' | 'high';
+  completed: boolean;
 }
 
 export const TaskForm = () => {
@@ -18,10 +19,12 @@ export const TaskForm = () => {
     
     try {
       await createTask({
-        ...data,
-        userId: user._id,
-        completed: false,
-        createdAt: new Date().toISOString()
+        title: data.title,
+        description: data.description,
+        subject: data.subject,
+        dueDate: data.dueDate,
+        priority: data.priority,
+        completed: false
       });
       reset();
     } catch (error) {

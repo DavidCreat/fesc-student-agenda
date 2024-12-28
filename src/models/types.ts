@@ -8,14 +8,28 @@ export interface User {
 }
 
 export interface ScheduleEntry {
-  _id: string;
+  _id?: string;
   userId: string;
   subject: string;
+  professor: string;
+  room: string;
+  dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+  startTime: string; // formato "HH:mm"
+  endTime: string; // formato "HH:mm"
+  semester: number;
+  career: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateScheduleEntryDTO {
+  subject: string;
+  professor: string;
+  room: string;
+  dayOfWeek: ScheduleEntry['dayOfWeek'];
   startTime: string;
   endTime: string;
-  date: string;
-  room?: string;
-  professor?: string;
+  semester: number;
 }
 
 export interface Task {
@@ -27,6 +41,7 @@ export interface Task {
   completed: boolean;
   dueDate: string;
   createdAt: string;
+  priority: 'low' | 'medium' | 'high';
 }
 
 export interface SessionLog {
@@ -43,3 +58,7 @@ export interface Recommendation {
   type: string;
   url: string;
 }
+
+export type TaskFormData = Omit<Task, '_id' | 'userId' | 'createdAt'> & {
+  completed: boolean;
+};
