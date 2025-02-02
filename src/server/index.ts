@@ -5,6 +5,7 @@ import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
 import { errorHandler } from './middleware/errorHandler';
 import dotenv from 'dotenv';
+import recommendationsRoutes from './routes/recommendations';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
 
 // Error handler
 app.use(errorHandler);

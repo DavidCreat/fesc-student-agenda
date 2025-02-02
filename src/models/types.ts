@@ -26,10 +26,12 @@ export interface CreateScheduleEntryDTO {
   subject: string;
   professor: string;
   room: string;
-  dayOfWeek: ScheduleEntry['dayOfWeek'];
+  dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'; // Ensure this matches
   startTime: string;
   endTime: string;
   semester: number;
+  userId?: string; // Optional for creation
+  career?: string; // Add this if needed
 }
 
 export interface Task {
@@ -47,10 +49,9 @@ export interface Task {
 export interface SessionLog {
   _id: string;
   userId: string;
-  startTime: string;
-  endTime?: string;
-  duration?: number;
-  activity: string;
+  startTime: string; // or Date
+  duration: number; // in minutes
+  // Add any other relevant fields
 }
 
 export interface Recommendation {

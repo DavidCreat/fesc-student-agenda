@@ -1,11 +1,12 @@
 import { useForm } from 'react-hook-form';
 import { CreateScheduleEntryDTO } from '../models/types';
-import { FormField } from './common/FormField';
+import FormField from './common/FormField';
 import { Button } from './common/Button';
 import { Select } from './common/Select';
 import { CLASSROOMS } from '../constants/classrooms';
 import { useScheduleActions } from '../hooks/schedule/useScheduleActions';
-import { Input } from './common/Input';
+import Input from './common/Input';
+import DashboardService from '../services/dashboard';
 
 const DAYS_OF_WEEK = [
   { value: 'monday', label: 'Lunes' },
@@ -22,16 +23,25 @@ export const ScheduleForm = () => {
 
   const onSubmit = async (data: CreateScheduleEntryDTO) => {
     try {
-      await createSchedule(data);
+      const scheduleData = {
+        ...data,
+        userId: 'user_id_placeholder', // Replace with actual user ID from context/store
+        career: 'default_career', // Set a default or retrieve from user context
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await DashboardService.createScheduleEntry(scheduleData);
       reset();
       alert('Clase agregada exitosamente');
     } catch (error) {
       console.error('Error en formulario:', error);
+      alert('Error al agregar la clase. Intente nuevamente.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow mb-6">
       <h2 className="text-xl font-bold text-gray-800">Agregar Clase</h2>
 
       {error && (
@@ -42,30 +52,20 @@ export const ScheduleForm = () => {
 
       <FormField
         label="Materia"
-        type="text"
-        {...register('subject', { 
-          required: 'La materia es requerida',
-          minLength: { value: 3, message: 'Mínimo 3 caracteres' }
-        })}
         error={errors.subject?.message}
       >
         <Input
-          {...register('subject', { required: 'La materia es requerida' })}
+          {...register('subject', { required: 'La materia es requerida', minLength: { value: 3, message: 'Mínimo 3 caracteres' } })}
           placeholder="Materia"
         />
       </FormField>
 
       <FormField
         label="Profesor"
-        type="text"
-        {...register('professor', { 
-          required: 'El profesor es requerido',
-          minLength: { value: 3, message: 'Mínimo 3 caracteres' }
-        })}
         error={errors.professor?.message}
       >
         <Input
-          {...register('professor', { required: 'El profesor es requerido' })}
+          {...register('professor', { required: 'El profesor es requerido', minLength: { value: 3, message: 'Mínimo 3 caracteres' } })}
           placeholder="Profesor"
         />
       </FormField>
@@ -145,3 +145,5 @@ export const ScheduleForm = () => {
     </form>
   );
 };
+
+export default ScheduleForm;

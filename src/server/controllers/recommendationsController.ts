@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
-import { fetchRecommendations } from '../../services/recommendations';
+import { fetchRecommendationsFromDB } from '../../services/recommendationsService';
 
-export const getRecommendations = async (req: Request, res: Response) => {
+export const fetchRecommendations = async (req: Request, res: Response) => {
   const { career, semester } = req.body;
+
   try {
-    const recommendations = await fetchRecommendations(career, semester);
-    res.json(recommendations);
+    const recommendations = await fetchRecommendationsFromDB(career, semester);
+    return res.json({ success: true, data: recommendations, message: 'Recommendations fetched successfully' });
   } catch (error) {
-    console.error('Error al obtener recomendaciones:', error);
-    res.status(500).json({ message: 'Error al obtener recomendaciones' });
+    console.error('Error fetching recommendations:', error);
+    return res.status(500).json({ success: false, data: null, message: 'Error al obtener recomendaciones' });
   }
 }; 

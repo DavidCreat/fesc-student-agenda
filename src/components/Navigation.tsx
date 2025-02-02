@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useState } from 'react';
-import { Home, Calendar, BookOpen, Clock, LogOut } from 'lucide-react';
+import { Home, Calendar, BookOpen, Clock, LogOut, User, BarChart } from 'lucide-react';
 
 export const Navigation = () => {
   const user = useStore((state) => state.user);
@@ -48,6 +48,14 @@ export const Navigation = () => {
             <Link to="/session" className="flex items-center space-x-1 py-2">
               <Clock className="w-5 h-5" />
               <span>Sesión</span>
+            </Link>
+            <Link to="/profile" className="flex items-center space-x-1 py-2">
+              <User className="w-5 h-5" />
+              <span>Perfil</span>
+            </Link>
+            <Link to="/reports" className="flex items-center space-x-1 py-2">
+              <BarChart className="w-5 h-5" />
+              <span>Reportes</span>
             </Link>
           </div>
 
@@ -97,6 +105,22 @@ export const Navigation = () => {
             >
               <Clock className="w-5 h-5" />
               <span>Sesión</span>
+            </Link>
+            <Link 
+              to="/profile"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <User className="w-5 h-5" />
+              <span>Perfil</span>
+            </Link>
+            <Link 
+              to="/reports"
+              className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
+              onClick={() => setIsOpen(false)}
+            >
+              <BarChart className="w-5 h-5" />
+              <span>Reportes</span>
             </Link>
           </div>
         </div>

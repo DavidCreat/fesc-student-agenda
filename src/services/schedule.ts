@@ -1,41 +1,38 @@
-import { api } from '../lib/api';
-import { ScheduleEntry, CreateScheduleEntryDTO } from '../models/types';
+import api from './api/axios';
+import { ScheduleEntry } from '../models/types';
 
-class ScheduleService {
-  private static instance: ScheduleService;
-
-  private constructor() {}
-
-  static getInstance(): ScheduleService {
-    if (!ScheduleService.instance) {
-      ScheduleService.instance = new ScheduleService();
-    }
-    return ScheduleService.instance;
+export const fetchSchedule = async (userId: string): Promise<{ success: boolean; data: ScheduleEntry[] | null; message: string }> => {
+  try {
+    const response = await api.get(`/schedule/${userId}`);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Schedule fetched successfully',
+    };
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    return {
+      success: false,
+      data: null,
+      message: 'Error al obtener el horario',
+    };
   }
+};
 
-  async createSchedule(data: CreateScheduleEntryDTO): Promise<{ schedule: ScheduleEntry }> {
-    try {
-      const response = await api.post('/auth/schedule', data);
-      return { schedule: response.data };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Error al crear clase');
-    }
+export const createScheduleEntry = async (entry: Omit<ScheduleEntry, '_id'>): Promise<{ success: boolean; data: ScheduleEntry | null; message: string }> => {
+  try {
+    const response = await api.post('/schedule', entry);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Schedule entry created successfully',
+    };
+  } catch (error) {
+    console.error('Error creating schedule entry:', error);
+    return {
+      success: false,
+      data: null,
+      message: 'Error al crear la entrada del horario',
+    };
   }
-
-  async getSchedule(): Promise<{ schedules: ScheduleEntry[] }> {
-    try {
-      const response = await api.get('/auth/schedule');
-      return { schedules: response.data };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Error al obtener horario');
-    }
-  }
-}
-
-export const scheduleService = ScheduleService.getInstance(); 
+};

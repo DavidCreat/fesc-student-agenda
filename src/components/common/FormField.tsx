@@ -1,29 +1,19 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { forwardRef } from 'react';
 
-interface FormFieldProps {
+interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
-  children: React.ReactNode;
-  type?: string;
+  children: React.ReactElement;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ label, error, children }) => {
+const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ label, error, children, ...props }, ref) => {
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-1 text-sm text-red-600"
-        >
-          {error}
-        </motion.p>
-      )}
+      <label className="block text-gray-700">{label}</label>
+      {React.cloneElement(children, { ref })}
+      {error && <span className="text-red-500">{error}</span>}
     </div>
   );
-};
+});
+
+export default FormField;
