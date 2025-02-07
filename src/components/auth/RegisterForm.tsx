@@ -4,7 +4,7 @@ import { UserPlus } from 'lucide-react';
 import { useAuthActions } from '../../hooks/auth';
 import { RegisterData } from '../../services/auth';
 import { CAREERS } from '../../constants/careers';
-import { FormField } from '../common/FormField';
+import FormField  from '../common/FormField';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 

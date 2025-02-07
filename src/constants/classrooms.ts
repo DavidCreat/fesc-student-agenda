@@ -1,0 +1,41 @@
+export const CLASSROOMS = [
+  // Bloque A
+  { value: 'A-101', label: 'A-101 - Sistemas y Multimedia', capacity: 25 },
+  { value: 'A-102', label: 'A-102 - Sistemas y Multimedia', capacity: 25 },
+  { value: 'A-103', label: 'A-103 - Sistemas y Multimedia', capacity: 25 },
+  { value: 'A-104', label: 'A-104 - Sistemas y Multimedia', capacity: 25 },
+  { value: 'A-105', label: 'A-105 - Laboratorio Financiera', capacity: 25 },
+  { value: 'A-201', label: 'A-201', capacity: 50 },
+  { value: 'A-202', label: 'A-202 - Biblioteca', capacity: 30 },
+  { value: 'A-203', label: 'A-203', capacity: 30 },
+  { value: 'A-204', label: 'A-204 - Sala de Reuniones', capacity: 25 },
+  { value: 'A-206', label: 'A-206', capacity: 30 },
+  { value: 'A-207', label: 'A-207', capacity: 30 },
+  { value: 'A-208', label: 'A-208', capacity: 30 },
+  { value: 'A-209', label: 'A-209', capacity: 30 },
+  { value: 'A-210', label: 'A-210', capacity: 30 },
+  { value: 'A-211', label: 'A-211', capacity: 30 },
+
+  // Bloque B
+  { value: 'B-201', label: 'B-201 - Laboratorio de Redes', capacity: 30 },
+  { value: 'B-202', label: 'B-202', capacity: 30 },
+  { value: 'B-203', label: 'B-203 - Multimedia', capacity: 30 },
+  { value: 'B-204', label: 'B-204 - Sistemas y Multimedia', capacity: 35 },
+
+  // Bloque C
+  { value: 'C-101', label: 'C-101 - Laboratorio de Negocios', capacity: 35 },
+  { value: 'C-102', label: 'C-102', capacity: 30 },
+  { value: 'C-201', label: 'C-201 - Taller de Fotografía', capacity: 35 },
+  { value: 'C-202', label: 'C-202', capacity: 40 },
+  { value: 'C-205', label: 'C-205 - Sala MAC', capacity: 25 },
+  { value: 'C-206', label: 'C-206 - Sala de Dibujo', capacity: 40 },
+  { value: 'C-207', label: 'C-207', capacity: 40 },
+  { value: 'C-301', label: 'C-301 - Especialización', capacity: 40 },
+  { value: 'C-302', label: 'C-302 - Especialización', capacity: 35 },
+  { value: 'C-303', label: 'C-303', capacity: 40 },
+  { value: 'C-304', label: 'C-304', capacity: 40 },
+  { value: 'C-305', label: 'C-305', capacity: 40 },
+  { value: 'C-306', label: 'C-306', capacity: 40 },
+  { value: 'C-401', label: 'C-401', capacity: 35 },
+  { value: 'C-402', label: 'C-402', capacity: 30 },
+]; 

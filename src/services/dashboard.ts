@@ -1,6 +1,6 @@
 // src/services/dashboard.ts
-import { api } from './api/axios';
-import type { Task, ScheduleEntry, SessionLog } from '../models/types';
+import api from './api/axios';
+import { Task, ScheduleEntry, SessionLog } from '../models/types';
 
 class DashboardService {
   async getTasks(userId: string): Promise<Task[]> {
@@ -42,19 +42,9 @@ class DashboardService {
   }
 
   async getSessionLogs(userId: string): Promise<SessionLog[]> {
-    const response = await api.get(`/sessions/${userId}`);
-    return response.data;
-  }
-
-  async createSessionLog(log: Omit<SessionLog, '_id'>): Promise<SessionLog> {
-    const response = await api.post('/sessions', log);
-    return response.data;
-  }
-
-  async updateSessionLog(logId: string, update: Partial<SessionLog>): Promise<SessionLog> {
-    const response = await api.patch(`/sessions/${logId}`, update);
+    const response = await api.get(`/session-logs/${userId}`);
     return response.data;
   }
 }
 
-export const dashboardService = new DashboardService();
+export default new DashboardService();

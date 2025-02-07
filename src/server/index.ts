@@ -5,6 +5,7 @@ import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
 import { errorHandler } from './middleware/errorHandler';
 import dotenv from 'dotenv';
+import recommendationsRoutes from './routes/recommendations';
 
 dotenv.config();
 
@@ -14,12 +15,25 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests from both HTTP and HTTPS
+    if (!origin || origin.startsWith('http://') || origin.startsWith('https://')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
+
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
 
 // Error handler
 app.use(errorHandler);

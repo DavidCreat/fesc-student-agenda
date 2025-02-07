@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { useStore } from '../store/useStore';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useScheduleActions } from '../hooks/schedule/useScheduleActions';
+import { useEffect } from 'react';
 
 const HOURS = Array.from({ length: 15 }, (_, i) => {
   const hour = i + 6;
@@ -11,13 +11,18 @@ const HOURS = Array.from({ length: 15 }, (_, i) => {
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export const Schedule = () => {
-  const schedule = useStore((state) => state.schedule);
+  const schedules = useStore((state) => state.schedules) || [];
+  const { getSchedule } = useScheduleActions();
+
+  useEffect(() => {
+    getSchedule().catch(console.error);
+  }, []);
 
   const getClassForTimeSlot = (day: string, hour: string) => {
-    return schedule.find(entry => {
-      const entryDay = format(new Date(entry.date), 'EEEE', { locale: es }).toLowerCase();
+    return schedules.find(entry => {
       const entryStartHour = entry.startTime.split(':')[0];
-      return entryDay === day.toLowerCase() && entryStartHour === hour.split(':')[0];
+      return entry.dayOfWeek.toLowerCase() === day.toLowerCase() && 
+             entryStartHour === hour.split(':')[0];
     });
   };
 

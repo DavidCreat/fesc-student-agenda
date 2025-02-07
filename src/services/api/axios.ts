@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const api = axios.create({
+const api = axios.create({
   baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
@@ -30,3 +30,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export default api;

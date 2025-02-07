@@ -4,6 +4,9 @@ import { Dashboard } from '../components/Dashboard';
 import { SchedulePage } from '../pages/SchedulePage';
 import { TasksPage } from '../pages/TasksPage';
 import { AuthPage } from '../pages/AuthPage';
+import { Profile } from '../components/Profile';
+import { Reports } from '../components/Reports';
+import { SessionPage } from '../pages/SessionPage';
 import { useAuthState } from '../hooks/auth';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -31,6 +34,9 @@ export const AppRoutes = () => {
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/schedule" element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
           <Route path="/tasks" element={<PrivateRoute><TasksPage /></PrivateRoute>} />
+          <Route path="/session" element={<PrivateRoute><SessionPage /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

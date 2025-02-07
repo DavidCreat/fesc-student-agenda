@@ -1,11 +1,11 @@
-const API_TOKEN = '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';
+import { HUGGINGFACE_TOKEN, HUGGINGFACE_API_URL } from '../config';
 
 export const fetchRecommendations = async (subjects: string[]) => {
   try {
-    const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-mnli', {
+    const response = await fetch(HUGGINGFACE_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${API_TOKEN}`,
+        'Authorization': `Bearer ${HUGGINGFACE_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

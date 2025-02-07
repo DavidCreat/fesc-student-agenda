@@ -9,16 +9,6 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-      },
-    },
-    headers: {
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' http: https:; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:5000 ws://localhost:*; img-src 'self' data: https:; font-src 'self' data:;"
-    }
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
       }
     }
   }

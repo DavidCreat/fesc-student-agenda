@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { User } from '../models/types';
+import { AUTH_API_URL } from '../config/env';
 
 export interface RegisterData {
   fullName: string;
@@ -24,9 +25,7 @@ export interface AuthResponse {
 class AuthService {
   private token: string | null = null;
   private api = axios.create({
-    baseURL: import.meta.env.DEV 
-      ? '/api/auth'  // Desarrollo: usa el proxy de Vite
-      : '/api/auth', // Producción: usa la misma base URL
+    baseURL: AUTH_API_URL,
     headers: {
       'Content-Type': 'application/json',
     },

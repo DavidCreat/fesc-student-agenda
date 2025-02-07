@@ -1,90 +1,59 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authService } from '../services/auth';
-import { dashboardService } from '../services/dashboard';
-import type { User, Task, ScheduleEntry } from '../models/types';
+import { User, ScheduleEntry, Task, TaskFormData } from '../models/types';
+import { api } from '../lib/api';
 
-interface AppState {
+interface Store {
   user: User | null;
+  schedules: ScheduleEntry[] | null;
   tasks: Task[];
-  schedule: ScheduleEntry[];
   sessionStartTime: number | null;
   setUser: (user: User | null) => void;
-  createTask: (task: Omit<Task, '_id'>) => Promise<void>;
-  createScheduleEntry: (entry: Omit<ScheduleEntry, '_id'>) => Promise<void>;
+  setSchedules: (schedules: ScheduleEntry[]) => void;
+  setTasks: (tasks: Task[]) => void;
+  createTask: (task: TaskFormData) => Promise<void>;
   toggleTaskComplete: (taskId: string) => Promise<void>;
+  createSchedule: (schedule: Omit<ScheduleEntry, '_id'>) => Promise<void>;
   startSession: () => void;
   endSession: () => void;
-  initialize: () => Promise<void>;
+  createScheduleEntry: (data: ScheduleEntry) => Promise<void>;
 }
 
-export const useStore = create<AppState>()(
+export const useStore = create<Store>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
+      schedules: [],
       tasks: [],
-      schedule: [],
       sessionStartTime: null,
-
       setUser: (user) => set({ user }),
+      setSchedules: (schedules) => set({ schedules }),
+      setTasks: (tasks) => set({ tasks }),
       startSession: () => set({ sessionStartTime: Date.now() }),
       endSession: () => set({ sessionStartTime: null }),
-
-      initialize: async () => {
-        try {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const user = await authService.getCurrentUser();
-            if (user) {
-              set({ user });
-              // Cargar tareas y horario del usuario
-              const tasks = await dashboardService.getTasks(user._id);
-              const schedule = await dashboardService.getSchedule(user._id);
-              set({ tasks, schedule });
-            }
-          }
-        } catch (error) {
-          console.error('Error initializing store:', error);
-          localStorage.removeItem('token');
-          set({ user: null, tasks: [], schedule: [] });
-        }
-      },
-
       createTask: async (task) => {
-        try {
-          const newTask = await dashboardService.createTask(task);
-          set((state) => ({ tasks: [...state.tasks, newTask] }));
-        } catch (error) {
-          console.error('Error creating task:', error);
-        }
+        const response = await api.post('/auth/tasks', task);
+        set((state) => ({ tasks: [...state.tasks, response.data] }));
       },
-
-      createScheduleEntry: async (entry) => {
-        try {
-          const newEntry = await dashboardService.createScheduleEntry(entry);
-          set((state) => ({ schedule: [...state.schedule, newEntry] }));
-        } catch (error) {
-          console.error('Error creating schedule entry:', error);
-        }
-      },
-
       toggleTaskComplete: async (taskId) => {
-        try {
-          const task = get().tasks.find((t) => t._id === taskId);
-          if (task) {
-            const updatedTask = await dashboardService.updateTask(taskId, {
-              completed: !task.completed
-            });
-            set((state) => ({
-              tasks: state.tasks.map((t) => 
-                t._id === taskId ? updatedTask : t
-              )
-            }));
-          }
-        } catch (error) {
-          console.error('Error toggling task:', error);
-        }
-      }
+        const response = await api.put(`/auth/tasks/${taskId}/toggle`);
+        set((state) => ({
+          tasks: state.tasks.map(task => 
+            task._id === taskId ? response.data : task
+          )
+        }));
+      },
+      createSchedule: async (schedule) => {
+        const response = await api.post('/auth/schedule', schedule);
+        set((state) => ({ 
+          schedules: [...(state.schedules || []), response.data]
+        }));
+      },
+      createScheduleEntry: async (data) => {
+        // Implementa la lógica para crear una entrada de horario aquí
+        console.log('Creating schedule entry:', data);
+        // Ejemplo: await api.createSchedule(data);
+      },
     }),
     {
       name: 'app-storage',

@@ -3,54 +3,45 @@ import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { authService, RegisterData, LoginCredentials } from '../../services/auth';
 
-export const useAuthActions = () => {
+export const useAuth = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const setUser = useStore((state) => state.setUser);
+  const { user, setUser } = useStore((state) => ({ 
+    user: state.user, 
+    setUser: state.setUser 
+  }));
 
-  const handleRegister = async (data: RegisterData) => {
+  const handleAuth = async (
+    credentials: LoginCredentials | RegisterData,
+    type: 'login' | 'register'
+  ) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await authService.register(data);
+      const response = await (type === 'login' 
+        ? authService.login(credentials as LoginCredentials)
+        : authService.register(credentials as RegisterData)
+      );
       setUser(response.user);
       return response;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al registrar usuario';
-      setError(message);
+      setError(err instanceof Error ? err.message : `Error al ${type === 'login' ? 'iniciar sesión' : 'registrar'}`);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogin = async (credentials: LoginCredentials) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const response = await authService.login(credentials);
-      setUser(response.user);
-      return response;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
-      setError(message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    setUser(null);
   };
 
   return {
-    handleRegister,
-    handleLogin,
-    handleLogout,
+    user,
     loading,
     error,
-    isAuthenticated: authService.isAuthenticated()
+    isAuthenticated: !!user,
+    login: (creds: LoginCredentials) => handleAuth(creds, 'login'),
+    register: (data: RegisterData) => handleAuth(data, 'register'),
+    logout: () => {
+      authService.logout();
+      setUser(null);
+    }
   };
 };

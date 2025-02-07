@@ -4,9 +4,10 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   console.error('Error:', err);
   
   if (err.name === 'ValidationError') {
+    const errors = Object.values(err.errors).map((e: any) => e.message);
     return res.status(400).json({
-      message: 'Error de validación',
-      errors: Object.values(err.errors).map((e: any) => e.message)
+      message: errors[0] || 'Error de validación',
+      errors: errors
     });
   }
 
