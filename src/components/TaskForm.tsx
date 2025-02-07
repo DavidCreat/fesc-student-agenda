@@ -1,11 +1,22 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useStore } from '../store/useStore';
-import { TaskFormData } from '../models/types';
 
-export const TaskForm = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskFormData>();
-  const { user, createTask } = useStore();
+interface TaskFormData {
+  title: string;
+  description?: string;
+  subject: string;
+  priority: 'low' | 'medium' | 'high';
+  dueDate: string;
+}
+
+interface TaskFormProps {
+  onSuccess?: () => void;
+}
+
+export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess }) => {
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<TaskFormData>();
+  const createTask = useStore((state) => state.createTask);
 
   const onSubmit = async (data: TaskFormData) => {
     try {

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { FaGraduationCap, FaCalendarAlt, FaBook, FaBell, FaUser } from 'react-icons/fa';
+import { FaGraduationCap, FaCalendarAlt, FaBook, FaBell, FaUser, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useStore } from '../store/useStore';
 import { DashboardModal } from './modals/DashboardModal';
 import { TaskForm } from './forms/TaskForm';
 import { ScheduleForm } from './forms/ScheduleForm';
 import { useNavigate } from 'react-router-dom';
 import { dashboardService } from '../services/dashboard/DashboardService';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 type InfoCardType = {
   id: string;
@@ -15,6 +18,25 @@ type InfoCardType = {
   type: 'task' | 'schedule' | 'note';
   dueDate?: string;
 }
+
+interface CustomArrowProps {
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  icon: React.ReactNode;
+}
+
+const CustomArrow: React.FC<CustomArrowProps> = ({ className, style, onClick, icon }) => (
+  <div
+    className={`${className} z-10 !flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 before:content-none group`}
+    style={{ ...style }}
+    onClick={onClick}
+  >
+    <div className="text-gray-400 group-hover:text-gray-600 transition-colors duration-200 text-xl">
+      {icon}
+    </div>
+  </div>
+);
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -156,43 +178,68 @@ export const Dashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Información Importante</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pendingTasks.slice(0, 3).map((task) => (
-              <InfoCard
-                key={task._id}
-                info={{
+          <Slider
+            dots={true}
+            infinite={false}
+            speed={500}
+            slidesToShow={3}
+            slidesToScroll={1}
+            prevArrow={<CustomArrow icon={<FaChevronLeft size={20} className="ml-[-2px]" />} />}
+            nextArrow={<CustomArrow icon={<FaChevronRight size={20} className="ml-[2px]" />} />}
+            responsive={[
+              {
+                breakpoint: 1024,
+                settings: {
+                  slidesToShow: 2,
+                  slidesToScroll: 1,
+                }
+              },
+              {
+                breakpoint: 640,
+                settings: {
+                  slidesToShow: 1,
+                  slidesToScroll: 1,
+                }
+              }
+            ]}
+            className="mx-[-15px] px-[15px]"
+          >
+            {[
+              ...pendingTasks.map(task => ({
+                key: task._id,
+                info: {
                   id: task._id,
                   title: task.title,
                   description: task.description,
-                  type: 'task',
+                  type: 'task' as const,
                   dueDate: task.dueDate
-                }}
-              />
-            ))}
-            {overdueTasks.slice(0, 3).map((task) => (
-              <InfoCard
-                key={task._id}
-                info={{
+                }
+              })),
+              ...overdueTasks.map(task => ({
+                key: task._id,
+                info: {
                   id: task._id,
                   title: task.title,
                   description: task.description,
-                  type: 'task',
+                  type: 'task' as const,
                   dueDate: task.dueDate
-                }}
-              />
-            ))}
-            {todaySchedule.slice(0, 3).map((entry) => (
-              <InfoCard
-                key={entry._id}
-                info={{
+                }
+              })),
+              ...todaySchedule.map(entry => ({
+                key: entry._id,
+                info: {
                   id: entry._id,
                   title: entry.subject,
                   description: `${entry.startTime} - ${entry.endTime} | ${entry.room}`,
-                  type: 'schedule'
-                }}
-              />
+                  type: 'schedule' as const
+                }
+              }))
+            ].map(({ key, info }) => (
+              <div key={key} className="px-3">
+                <InfoCard info={info} />
+              </div>
             ))}
-          </div>
+          </Slider>
         </div>
 
         {/* Quick Actions Section */}
