@@ -7,7 +7,7 @@ import { AuthPage } from './pages/AuthPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Main Components
-import { Dashboard } from '@components/Dashboard';
+import { DashboardPage } from './pages/DashboardPage';
 import { Navigation } from '@components/Navigation';
 import { Profile } from '@components/Profile';
 import { Schedule } from '@components/Schedule';
@@ -55,7 +55,8 @@ const App: React.FC = () => {
               {/* Protected Routes */}
               <Route path="/dashboard" element={
                 <ProtectedLayout>
-                  <Dashboard />
+                  <DashboardPage />
+
                 </ProtectedLayout>
               } />
               

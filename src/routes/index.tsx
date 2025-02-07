@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Navigation } from '../components/Navigation.js';
-import { Dashboard } from '../components/Dashboard.js';
-import { SchedulePage } from '../pages/SchedulePage.js';
-import { TasksPage } from '../pages/TasksPage.js';
-import { AuthPage } from '../pages/AuthPage.js';
-import { Profile } from '../components/Profile.js';
-import { Reports } from '../components/Reports.js';
-import { SessionPage } from '../pages/SessionPage.js';
-import { useAuthState } from '../hooks/auth.js';
+import { Navigation } from '../components/Navigation';
+import { Dashboard } from '../components/Dashboard';
+import { SchedulePage } from '../pages/SchedulePage';
+import { TasksPage } from '../pages/TasksPage';
+import { AuthPage } from '../pages/AuthPage';
+import { Profile } from '../components/Profile';
+import { Reports } from '../components/Reports';
+import { SessionPage } from '../pages/SessionPage';
+import { useAuthState } from '../hooks/auth';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthState();

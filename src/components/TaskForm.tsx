@@ -1,3 +1,4 @@
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useStore } from '../store/useStore';
 import { TaskFormData } from '../models/types';
@@ -7,17 +8,10 @@ export const TaskForm = () => {
   const { user, createTask } = useStore();
 
   const onSubmit = async (data: TaskFormData) => {
-    if (!user?.id) return;
-    
     try {
-      await createTask({
-        title: data.title,
-        description: data.description,
-        subject: data.subject,
-        dueDate: data.dueDate,
-        priority: data.priority
-      });
+      await createTask(data);
       reset();
+      onSuccess?.();
     } catch (error) {
       console.error('Error al crear la tarea:', error);
     }
@@ -84,9 +78,12 @@ export const TaskForm = () => {
       <div className="mt-6">
         <button
           type="submit"
-          className="w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          disabled={isSubmitting}
+          className={`w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+            isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
         >
-          Crear Tarea
+          {isSubmitting ? 'Creando...' : 'Crear Tarea'}
         </button>
       </div>
     </form>

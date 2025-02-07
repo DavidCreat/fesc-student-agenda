@@ -33,7 +33,7 @@ export const Navigation = () => {
 
           {/* Enlaces para desktop */}
           <div className="hidden sm:flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-1 py-2">
+            <Link to="/dashboard" className="flex items-center space-x-1 py-2">
               <Home className="w-5 h-5" />
               <span>Inicio</span>
             </Link>
@@ -75,7 +75,7 @@ export const Navigation = () => {
         <div className={`sm:hidden ${isOpen ? 'block' : 'hidden'} pb-4 bg-red-600`}>
           <div className="flex flex-col space-y-2 px-4">
             <Link 
-              to="/"
+              to="/dashboard"
               className="flex items-center space-x-2 py-2 hover:bg-red-500 rounded-md px-2"
               onClick={() => setIsOpen(false)}
             >

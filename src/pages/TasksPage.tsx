@@ -1,13 +1,6 @@
-import { TaskList } from '../components/TaskList';
-import { TaskForm } from '../components/TaskForm';
+import React from 'react';
+import { Tasks } from '../components/Tasks';
 
-export const TasksPage = () => {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <TaskList />
-        <TaskForm />
-      </div>
-    </div>
-  );
+export const TasksPage: React.FC = () => {
+  return <Tasks />;
 };

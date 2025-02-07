@@ -1,7 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, ScheduleEntry, Task, TaskFormData } from '../models/types.js';
+import { User, ScheduleEntry, Task } from '../models/types.js';
 import { api } from '../lib/api.js';
+import { taskService } from '../services/task/TaskService';
+
+interface CreateTaskData {
+  title: string;
+  description?: string;
+  subject: string;
+  priority: 'low' | 'medium' | 'high';
+  dueDate: string;
+}
 
 interface Store {
   user: User | null;
@@ -12,8 +21,10 @@ interface Store {
   setUser: (user: User | null) => void;
   setSchedules: (schedules: ScheduleEntry[]) => void;
   setTasks: (tasks: Task[]) => void;
-  createTask: (task: TaskFormData) => Promise<void>;
+  loadTasks: () => Promise<void>;
+  createTask: (task: CreateTaskData) => Promise<void>;
   toggleTaskComplete: (taskId: string) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
   createSchedule: (schedule: Omit<ScheduleEntry, '_id'>) => Promise<void>;
   startSession: () => void;
   endSession: () => void;
@@ -29,21 +40,51 @@ export const useStore = create<Store>()(
       tasks: [],
       sessionStartTime: null,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      setSchedules: (schedules) => set({ schedules }),
+      setSchedules: (schedules) => {
+        console.log('Actualizando horarios en el store:', schedules);
+        set({ schedules });
+      },
       setTasks: (tasks) => set({ tasks }),
       startSession: () => set({ sessionStartTime: Date.now() }),
       endSession: () => set({ sessionStartTime: null }),
+      loadTasks: async () => {
+        try {
+          const tasks = await taskService.getUserTasks();
+          set({ tasks });
+        } catch (error) {
+          console.error('Error loading tasks:', error);
+        }
+      },
       createTask: async (task) => {
-        const response = await api.post('/auth/tasks', task);
-        set((state) => ({ tasks: [...state.tasks, response.data] }));
+        try {
+          const newTask = await taskService.createTask(task);
+          set((state) => ({ tasks: [...state.tasks, newTask] }));
+        } catch (error) {
+          console.error('Error creating task:', error);
+          throw error;
+        }
       },
       toggleTaskComplete: async (taskId) => {
-        const response = await api.put(`/auth/tasks/${taskId}/toggle`);
-        set((state) => ({
-          tasks: state.tasks.map(task => 
-            task._id === taskId ? response.data : task
-          )
-        }));
+        try {
+          const task = await taskService.toggleTaskCompletion(taskId, true);
+          set((state) => ({
+            tasks: state.tasks.map(t => t._id === taskId ? task : t)
+          }));
+        } catch (error) {
+          console.error('Error toggling task:', error);
+          throw error;
+        }
+      },
+      deleteTask: async (taskId) => {
+        try {
+          await taskService.deleteTask(taskId);
+          set((state) => ({
+            tasks: state.tasks.filter(t => t._id !== taskId)
+          }));
+        } catch (error) {
+          console.error('Error deleting task:', error);
+          throw error;
+        }
       },
       createSchedule: async (schedule) => {
         const response = await api.post('/auth/schedule', schedule);
@@ -52,14 +93,19 @@ export const useStore = create<Store>()(
         }));
       },
       createScheduleEntry: async (data) => {
-        // Implementa la lógica para crear una entrada de horario aquí
-        console.log('Creating schedule entry:', data);
-        // Ejemplo: await api.createSchedule(data);
-      },
+        try {
+          const response = await api.post('/auth/schedule', data);
+          set((state) => ({
+            schedules: [...(state.schedules || []), response.data]
+          }));
+        } catch (error) {
+          console.error('Error creating schedule entry:', error);
+        }
+      }
     }),
     {
       name: 'app-storage',
-      partialize: (state) => ({ user: state.user, sessionStartTime: state.sessionStartTime })
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated })
     }
   )
 );
