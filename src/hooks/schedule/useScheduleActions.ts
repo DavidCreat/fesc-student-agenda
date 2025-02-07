@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import  dashboardService  from '../../services/dashboard';
-import { CreateScheduleEntryDTO, ScheduleEntry } from '../../models/types';
+import { ScheduleEntry } from '../../models/types';
 
 export const useScheduleActions = () => {
   const [loading, setLoading] = useState(false);

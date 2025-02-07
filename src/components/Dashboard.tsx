@@ -13,6 +13,10 @@ type RecommendationType = {
   date?: string;
 }
 
+interface DashboardProps {
+  studentId: string;
+}
+
 const RecommendationCard: React.FC<{ recommendation: RecommendationType }> = ({ recommendation }) => {
   const getIcon = () => {
     switch (recommendation.type) {
@@ -60,13 +64,15 @@ const RecommendationCard: React.FC<{ recommendation: RecommendationType }> = ({ 
   );
 };
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
   const user = useStore((state) => state.user);
   const { data: recommendations = [], isLoading, error } = useQuery({
-    queryKey: ['recommendations', user?.id],
-    queryFn: () => recommendationsService.getRecommendations({ limit: 6 }),
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // Mantener los datos frescos por 5 minutos
+    queryKey: ['recommendations', studentId],
+    queryFn: () => recommendationsService.getRecommendations({ 
+      limit: 6 
+    }),
+    enabled: !!studentId,
+    staleTime: 5 * 60 * 1000 // Mantener los datos frescos por 5 minutos
   });
 
   const renderDashboardContent = () => {

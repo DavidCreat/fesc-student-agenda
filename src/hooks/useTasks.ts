@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import type { Task } from '../models/types';
+import type { TaskFormData } from '../models/types';
 
 export const useTasks = () => {
   const [error, setError] = useState<string | null>(null);
@@ -8,13 +8,10 @@ export const useTasks = () => {
   const toggleTaskComplete = useStore((state) => state.toggleTaskComplete);
   const tasks = useStore((state) => state.tasks);
 
-  const handleAddTask = async (taskData: Omit<Task, '_id' | 'completed'>) => {
+  const handleAddTask = async (taskData: TaskFormData) => {
     try {
       setError(null);
-      await createTask({
-        ...taskData,
-        completed: false,
-      });
+      await createTask(taskData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al agregar tarea');
       throw err;

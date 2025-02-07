@@ -1,18 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useStore } from '../store/useStore';
-
 import { TaskFormData } from '../models/types';
-
-
-interface TaskFormData {
-  title: string;
-  description: string;
-  dueDate: string;
-  subject: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-}
-
 
 export const TaskForm = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskFormData>();
@@ -27,11 +15,7 @@ export const TaskForm = () => {
         description: data.description,
         subject: data.subject,
         dueDate: data.dueDate,
-
         priority: data.priority
-
-        priority: data.priority,
-        completed: false
       });
       reset();
     } catch (error) {

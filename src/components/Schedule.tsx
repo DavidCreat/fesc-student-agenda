@@ -1,12 +1,8 @@
 import React, { Fragment, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useScheduleActions } from '../hooks/schedule/useScheduleActions';
-
 import { FaPlus, FaClock, FaMapMarkerAlt, FaChalkboardTeacher } from 'react-icons/fa';
 import { ScheduleEntry } from '../models/types';
-
-import { useEffect } from 'react';
-
 
 const HOURS = Array.from({ length: 15 }, (_, i) => {
   const hour = i + 6;
@@ -14,7 +10,6 @@ const HOURS = Array.from({ length: 15 }, (_, i) => {
 });
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-
 
 const dayToEnglish: Record<string, ScheduleEntry['dayOfWeek']> = {
   'Lunes': 'monday',
@@ -48,23 +43,10 @@ export const Schedule: React.FC = () => {
     endTime: '08:00',
   });
 
-export const Schedule = () => {
-  const schedules = useStore((state) => state.schedules) || [];
-  const { getSchedule } = useScheduleActions();
-
-  useEffect(() => {
-    getSchedule().catch(console.error);
-  }, []);
-
-
   const getClassForTimeSlot = (day: string, hour: string) => {
     return schedules.find(entry => {
       const entryStartHour = entry.startTime.split(':')[0];
-
       return entry.dayOfWeek === dayToEnglish[day] && 
-
-      return entry.dayOfWeek.toLowerCase() === day.toLowerCase() && 
-
              entryStartHour === hour.split(':')[0];
     });
   };

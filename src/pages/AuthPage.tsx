@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuthState } from '../hooks/auth';
+import { useStore } from '../store/useStore';
 import Login from '../components/auth/login';
 import Register from '../components/auth/register';
 
 export const AuthPage = () => {
-  const { isAuthenticated } = useAuthState();
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
   const navigate = useNavigate();
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
