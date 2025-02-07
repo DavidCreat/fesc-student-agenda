@@ -30,7 +30,7 @@ export const Profile: React.FC = () => {
             </div>
           </div>
           <div className="text-center mt-4">
-            <h2 className="text-2xl font-bold text-white">{user.name}</h2>
+            <h2 className="text-2xl font-bold text-white">{user.fullName}</h2>
             <p className="text-red-100">Estudiante Activo</p>
           </div>
         </div>
@@ -74,7 +74,7 @@ export const Profile: React.FC = () => {
                 <FaGraduationCap className="h-5 w-5 text-red-500" />
                 <div>
                   <p className="text-sm text-gray-500">Programa Académico</p>
-                  <p className="text-gray-900">{user.program || 'No especificado'}</p>
+                  <p className="text-gray-900">{user.career || 'No especificado'}</p>
                 </div>
               </div>
 
@@ -98,23 +98,6 @@ export const Profile: React.FC = () => {
         <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
           Cambiar Contraseña
         </button>
-      </div>
-    </div>
-  );
-};
-import { useStore } from '../store/useStore';
-
-export const Profile = () => {
-  const user = useStore((state) => state.user);
-
-  return (
-    <div className="p-6 max-w-7xl mx-auto bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800">Perfil de Usuario</h2>
-      <div className="mt-4">
-        <p><strong>Nombre:</strong> {user?.fullName}</p>
-        <p><strong>Email:</strong> {user?.email}</p>
-        <p><strong>Carrera:</strong> {user?.career}</p>
-        <p><strong>Semestre:</strong> {user?.semester}</p>
       </div>
     </div>
   );
