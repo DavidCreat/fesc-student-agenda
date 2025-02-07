@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { TaskForm } from './TaskForm';
-import { FaCheckCircle, FaRegCircle, FaCalendarAlt, FaExclamationCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaRegCircle, FaCalendarAlt, FaExclamationCircle, FaTrash } from 'react-icons/fa';
 import { Task as TaskType } from '../models/types';
 
 const PriorityBadge: React.FC<{ priority: TaskType['priority'] }> = ({ priority }) => {
@@ -25,9 +25,20 @@ const PriorityBadge: React.FC<{ priority: TaskType['priority'] }> = ({ priority 
 };
 
 export const Tasks: React.FC = () => {
-  const tasks = useStore((state) => state.tasks) || [];
-  const toggleTaskComplete = useStore((state) => state.toggleTaskComplete);
+  const { tasks, loadTasks, toggleTaskComplete, deleteTask } = useStore();
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        await loadTasks();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTasks();
+  }, [loadTasks]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -43,6 +54,32 @@ export const Tasks: React.FC = () => {
   const isOverdue = (dueDate: string) => {
     return new Date(dueDate) < new Date();
   };
+
+  const handleToggleComplete = async (taskId: string) => {
+    try {
+      await toggleTaskComplete(taskId);
+    } catch (error) {
+      console.error('Error al cambiar el estado de la tarea:', error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta tarea?')) return;
+    
+    try {
+      await deleteTask(taskId);
+    } catch (error) {
+      console.error('Error al eliminar la tarea:', error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -63,7 +100,10 @@ export const Tasks: React.FC = () => {
       {/* Formulario */}
       {showForm && (
         <div className="bg-white rounded-lg shadow-lg">
-          <TaskForm />
+          <TaskForm onSuccess={() => {
+            setShowForm(false);
+            loadTasks();
+          }} />
         </div>
       )}
 
@@ -79,7 +119,7 @@ export const Tasks: React.FC = () => {
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-3">
                   <button
-                    onClick={() => toggleTaskComplete(task._id)}
+                    onClick={() => handleToggleComplete(task._id)}
                     className="mt-1"
                   >
                     {task.completed ? (
@@ -110,6 +150,12 @@ export const Tasks: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => handleDeleteTask(task._id)}
+                  className="text-gray-400 hover:text-red-600 transition-colors duration-200"
+                >
+                  <FaTrash className="h-5 w-5" />
+                </button>
               </div>
             </div>
           ))

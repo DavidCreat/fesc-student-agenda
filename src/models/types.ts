@@ -1,12 +1,12 @@
 export interface User {
-  id: string;
+  _id: string;
   email: string;
   fullName: string;
-  studentId: string;
   career: string;
   semester: number;
   schedule: 'day' | 'night';
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ScheduleEntry {

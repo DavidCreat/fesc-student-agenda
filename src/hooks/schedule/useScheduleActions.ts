@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import  dashboardService  from '../../services/dashboard';
-import { ScheduleEntry } from '../../models/types';
+import { scheduleService, CreateScheduleData } from '../../services/schedule/ScheduleService';
 
 export const useScheduleActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createSchedule = async (data: ScheduleEntry) => {
+  const createSchedule = async (data: CreateScheduleData) => {
     setLoading(true);
     setError(null);
     try {
-      await dashboardService.createScheduleEntry(data);
+      await scheduleService.createScheduleEntry(data);
     } catch (err) {
       setError('Error al agregar la clase');
       throw err;
@@ -19,5 +18,9 @@ export const useScheduleActions = () => {
     }
   };
 
-  return { createSchedule, loading, error };
-}; 
+  return {
+    createSchedule,
+    loading,
+    error
+  };
+};
