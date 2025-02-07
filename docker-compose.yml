@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       # Host Configuration
-      - HOST_URL=${HOST_URL:-https://fescagenda.tudominio.com
+      - HOST_URL=${HOST_URL:-https://fescagenda.tudominio.com}
       - HOST_IP=${HOST_IP:-http://5.161.52.22}
       
       # Server Configuration
