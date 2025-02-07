@@ -120,7 +120,7 @@ export const Reports: React.FC = () => {
             Horas de Estudio por Día
           </h2>
           <div className="h-64 flex items-end justify-between space-x-2">
-            {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, i) => (
+            {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
               <div key={day} className="flex-1 flex flex-col items-center">
                 <div
                   className="w-full bg-red-100 hover:bg-red-200 transition-colors duration-200 rounded-t"

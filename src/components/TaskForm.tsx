@@ -1,21 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { useStore } from '../store/useStore';
-
-interface TaskFormData {
-  title: string;
-  description: string;
-  dueDate: string;
-  subject: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-}
+import { TaskFormData } from '../models/types';
 
 export const TaskForm = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskFormData>();
   const { user, createTask } = useStore();
 
   const onSubmit = async (data: TaskFormData) => {
-    if (!user?._id) return;
+    if (!user?.id) return;
     
     try {
       await createTask({
@@ -23,8 +15,7 @@ export const TaskForm = () => {
         description: data.description,
         subject: data.subject,
         dueDate: data.dueDate,
-        priority: data.priority,
-        completed: false
+        priority: data.priority
       });
       reset();
     } catch (error) {
@@ -52,6 +43,7 @@ export const TaskForm = () => {
           <input
             {...register('title', { required: 'El título es requerido' })}
             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+            autoComplete="off"
           />
           {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}
         </div>
@@ -66,9 +58,9 @@ export const TaskForm = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Fecha de Entrega</label>
+          <label className="block text-sm font-medium text-gray-700">Fecha de entrega</label>
           <input
-            type="date"
+            type="datetime-local"
             {...register('dueDate', { required: 'La fecha de entrega es requerida' })}
             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
           />
@@ -78,20 +70,23 @@ export const TaskForm = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">Prioridad</label>
           <select
-            {...register('priority')}
+            {...register('priority', { required: 'La prioridad es requerida' })}
             className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
           >
             <option value="low">Baja</option>
             <option value="medium">Media</option>
             <option value="high">Alta</option>
           </select>
+          {errors.priority && <span className="text-red-500 text-sm">{errors.priority.message}</span>}
         </div>
+      </div>
 
+      <div className="mt-6">
         <button
           type="submit"
-          className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
+          className="w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         >
-          Agregar Tarea
+          Crear Tarea
         </button>
       </div>
     </form>

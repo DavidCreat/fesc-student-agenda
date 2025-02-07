@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useScheduleActions } from '../hooks/schedule/useScheduleActions';
-import { useEffect } from 'react';
 import { FaPlus, FaClock, FaMapMarkerAlt, FaChalkboardTeacher } from 'react-icons/fa';
+import { ScheduleEntry } from '../models/types';
 
 const HOURS = Array.from({ length: 15 }, (_, i) => {
   const hour = i + 6;
@@ -11,52 +11,73 @@ const HOURS = Array.from({ length: 15 }, (_, i) => {
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
+const dayToEnglish: Record<string, ScheduleEntry['dayOfWeek']> = {
+  'Lunes': 'monday',
+  'Martes': 'tuesday',
+  'Miércoles': 'wednesday',
+  'Jueves': 'thursday',
+  'Viernes': 'friday',
+  'Sábado': 'saturday'
+};
+
 interface NewScheduleEntry {
   subject: string;
+  professor: string;
+  room: string;
   dayOfWeek: string;
   startTime: string;
   endTime: string;
-  room: string;
-  professor: string;
 }
 
 export const Schedule: React.FC = () => {
+  const user = useStore((state) => state.user);
   const schedules = useStore((state) => state.schedules) || [];
-  const { getSchedule, createSchedule } = useScheduleActions();
+  const { createSchedule } = useScheduleActions();
   const [showForm, setShowForm] = useState(false);
   const [newEntry, setNewEntry] = useState<NewScheduleEntry>({
     subject: '',
+    professor: '',
+    room: '',
     dayOfWeek: DAYS[0],
     startTime: '07:00',
     endTime: '08:00',
-    room: '',
-    professor: '',
   });
-
-  useEffect(() => {
-    getSchedule().catch(console.error);
-  }, []);
 
   const getClassForTimeSlot = (day: string, hour: string) => {
     return schedules.find(entry => {
       const entryStartHour = entry.startTime.split(':')[0];
-      return entry.dayOfWeek.toLowerCase() === day.toLowerCase() && 
+      return entry.dayOfWeek === dayToEnglish[day] && 
              entryStartHour === hour.split(':')[0];
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     try {
-      await createSchedule(newEntry);
+      const scheduleEntry: ScheduleEntry = {
+        _id: '', // Será generado por el backend
+        userId: user.id,
+        subject: newEntry.subject,
+        professor: newEntry.professor,
+        room: newEntry.room,
+        dayOfWeek: dayToEnglish[newEntry.dayOfWeek],
+        startTime: newEntry.startTime,
+        endTime: newEntry.endTime,
+        semester: user.semester,
+        career: user.career
+      };
+      
+      await createSchedule(scheduleEntry);
       setShowForm(false);
       setNewEntry({
         subject: '',
+        professor: '',
+        room: '',
         dayOfWeek: DAYS[0],
         startTime: '07:00',
         endTime: '08:00',
-        room: '',
-        professor: '',
       });
     } catch (error) {
       console.error('Error al crear el horario:', error);
