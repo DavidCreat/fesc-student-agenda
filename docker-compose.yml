@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: fesc-student-agenda
+    ports:
+      - "3000:3000"  # Puerto para el frontend
+      - "5000:5000"  # Puerto para el backend
+    environment:
+      - NODE_ENV=production
+      # Host Configuration
+      - HOST_URL=${HOST_URL:-https://fescagenda.tudominio.com
+      - HOST_IP=${HOST_IP:-http://5.161.52.22}
+      
+      # Server Configuration
+      - VITE_PORT=5000
+      - VITE_FRONTEND_URL=${HOST_URL:-https://fescagenda.tudominio.com}:3000
+      
+      # MongoDB Configuration
+      - VITE_MONGODB_URI=${VITE_MONGODB_URI}
+      - VITE_MONGODB_DB_NAME=${VITE_MONGODB_DB_NAME}
+      
+      # JWT Configuration
+      - VITE_JWT_SECRET=${VITE_JWT_SECRET}
+      - VITE_JWT_EXPIRE=${VITE_JWT_EXPIRE}
+      
+      # API Configuration
+      - VITE_API_BASE_URL=${HOST_URL:-https://fescagenda.tudominio.com}:5000/api
+      - VITE_AUTH_API_URL=${HOST_URL:-https://fescagenda.tudominio.com}:5000/api/auth
+      - VITE_SERVER_URL=${HOST_URL:-https://fescagenda.tudominio.com}:5000
+      
+      # HuggingFace Configuration
+      - VITE_HUGGINGFACE_TOKEN=${VITE_HUGGINGFACE_TOKEN}
+      - VITE_HUGGINGFACE_API_URL=${VITE_HUGGINGFACE_API_URL}
+      
+      # Email Domain Configuration
+      - VITE_INSTITUTIONAL_EMAIL_DOMAIN=${VITE_INSTITUTIONAL_EMAIL_DOMAIN}
+      
+      # Recommendations Configuration
+      - VITE_RECOMMENDATIONS_PER_PAGE=${VITE_RECOMMENDATIONS_PER_PAGE}
+      - VITE_ENABLE_AI_RECOMMENDATIONS=${VITE_ENABLE_AI_RECOMMENDATIONS}
+      - VITE_DEFAULT_RECOMMENDATION_SOURCES=${VITE_DEFAULT_RECOMMENDATION_SOURCES}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

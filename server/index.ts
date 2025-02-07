@@ -12,6 +12,7 @@ import { SessionLog } from '../src/models/SessionLog';
 import { Task } from '../src/models/Task';
 import { ScheduleEntry } from '../src/models/ScheduleEntry';
 import { HfInference } from "@huggingface/inference";
+import fetch from 'node-fetch';
 
 // Load environment variables
 dotenv.config();
@@ -60,13 +61,51 @@ const findAvailablePort = (startPort: number): Promise<number> => {
 app.use(cors());
 app.use(express.json());
 
+// Función para validar enlaces
+async function validateLinks(recommendations: any) {
+  const validatedRecommendations = {
+    books: [] as any[],
+    videos: [] as any[]
+  };
+
+  // Validar enlaces de Amazon
+  for (const book of recommendations.books || []) {
+    try {
+      const response = await fetch(book.link);
+      if (response.ok && !response.url.includes('404')) {
+        validatedRecommendations.books.push(book);
+      }
+    } catch (error) {
+      console.log(`Invalid book link: ${book.link}`);
+    }
+  }
+
+  // Validar enlaces de YouTube
+  for (const video of recommendations.videos || []) {
+    try {
+      const response = await fetch(video.link);
+      if (response.ok && !response.url.includes('unavailable') && !response.url.includes('removed')) {
+        validatedRecommendations.videos.push(video);
+      }
+    } catch (error) {
+      console.log(`Invalid video link: ${video.link}`);
+    }
+  }
+
+  return validatedRecommendations;
+}
+
 // Recommendations endpoint
 app.post('/api/recommendations/generate', async (req, res) => {
   const { career, semester } = req.body;
   console.log('Generating recommendations for:', { career, semester });
 
-  const systemPrompt = `Eres un experto en educación que recomienda recursos de aprendizaje. Proporciona recomendaciones específicas y relevantes.`;
-  const userPrompt = `Necesito 3 recomendaciones de libros y 3 videos educativos para un estudiante de ${career} en el semestre ${semester}. Los libros deben ser relevantes para su nivel académico y la carrera. Los videos deben ser tutoriales o cursos específicos que le ayuden en su formación. Responde SOLO en formato JSON con la siguiente estructura exacta:
+  const systemPrompt = `Eres un experto en educación que recomienda recursos de aprendizaje. Proporciona recomendaciones específicas y relevantes. Asegúrate de que los enlaces sean reales y actuales.`;
+  const userPrompt = `Necesito 4 recomendaciones de libros y 4 videos educativos para un estudiante de ${career} en el semestre ${semester}. 
+  Los libros deben ser relevantes para su nivel académico y la carrera, con enlaces reales de Amazon. 
+  Los videos deben ser tutoriales o cursos específicos que le ayuden en su formación, con enlaces reales de YouTube.
+  Cada vez que te pregunte, debes dar recomendaciones diferentes pero igualmente relevantes.
+  Responde SOLO en formato JSON con la siguiente estructura exacta:
   {
     "books": [
       {"title": "título del libro", "link": "enlace real de amazon al libro", "description": "descripción breve"}
@@ -76,63 +115,122 @@ app.post('/api/recommendations/generate', async (req, res) => {
     ]
   }`;
 
-  try {
-    const chatCompletion = await inference.chatCompletion({
-      model: "deepseek-ai/DeepSeek-R1",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: "user",
-          content: userPrompt
-        }
-      ],
-      provider: "together",
-      max_tokens: 1000,
-      temperature: 0.7
-    });
-
-    console.log('Raw API response:', chatCompletion);
+  async function generateRecommendations(retryCount = 0): Promise<any> {
+    if (retryCount >= 3) {
+      console.log('Máximo número de intentos alcanzado');
+      return DEFAULT_RECOMMENDATIONS;
+    }
 
     try {
+      const chatCompletion = await inference.chatCompletion({
+        model: "deepseek-ai/DeepSeek-R1",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          {
+            role: "user",
+            content: userPrompt
+          }
+        ],
+        provider: "together",
+        max_tokens: 1500,
+        temperature: 0.9, // Aumentado para más variedad
+        top_p: 0.95,
+        frequency_penalty: 0.5, // Penaliza la repetición de términos
+        presence_penalty: 0.5 // Fomenta la diversidad
+      });
+
       const generatedText = chatCompletion.choices?.[0]?.message?.content;
       if (!generatedText) {
-        console.error("No generated text in response");
-        return res.json(DEFAULT_RECOMMENDATIONS);
+        throw new Error("No generated text in response");
       }
-      console.log('Generated text:', generatedText);
 
-      // Extraer solo la parte JSON de la respuesta
-      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+      // Limpiar y validar el JSON antes de parsearlo
+      let jsonText = generatedText;
+      
+      // Intentar extraer solo la parte JSON
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error("No JSON found in response");
       }
       
-      const recommendations = JSON.parse(jsonMatch[0]);
+      jsonText = jsonMatch[0];
       
+      // Limpiar caracteres problemáticos
+      jsonText = jsonText
+        .replace(/[\u0000-\u001F]+/g, '') // Eliminar caracteres de control
+        .replace(/\\n/g, '') // Eliminar saltos de línea escapados
+        .replace(/\\"/g, '"') // Manejar comillas escapadas
+        .replace(/"\s+/g, '"') // Eliminar espacios después de comillas
+        .replace(/\s+"/g, '"') // Eliminar espacios antes de comillas
+        .trim();
+
+      // Validar estructura básica del JSON
+      if (!jsonText.startsWith('{') || !jsonText.endsWith('}')) {
+        throw new Error("Invalid JSON structure");
+      }
+
+      let recommendations;
+      try {
+        recommendations = JSON.parse(jsonText);
+      } catch (parseError) {
+        console.error("JSON parsing error:", parseError, "Text:", jsonText);
+        throw new Error("Invalid JSON format");
+      }
+
+      // Validar estructura de las recomendaciones
+      if (!recommendations.books || !Array.isArray(recommendations.books) ||
+          !recommendations.videos || !Array.isArray(recommendations.videos)) {
+        throw new Error("Invalid recommendations structure");
+      }
+
       // Validar y limpiar las recomendaciones
       const cleanRecommendations = {
-        books: recommendations.books?.slice(0, 3).map(book => ({
-          title: book.title || "Libro recomendado",
-          link: book.link || "https://www.amazon.com",
-          description: book.description || "Libro relevante para tu carrera"
-        })) || DEFAULT_RECOMMENDATIONS.books,
-        videos: recommendations.videos?.slice(0, 3).map(video => ({
-          title: video.title || "Video recomendado",
-          link: video.link || "https://www.youtube.com",
-          description: video.description || "Video educativo relevante"
-        })) || DEFAULT_RECOMMENDATIONS.videos
+        books: recommendations.books
+          .filter(book => book && typeof book === 'object' && book.title && book.link)
+          .slice(0, 4)
+          .map(book => ({
+            title: String(book.title).trim(),
+            link: String(book.link).trim(),
+            description: String(book.description || "Libro relevante para tu carrera").trim()
+          })) || [],
+        videos: recommendations.videos
+          .filter(video => video && typeof video === 'object' && video.title && video.link)
+          .slice(0, 4)
+          .map(video => ({
+            title: String(video.title).trim(),
+            link: String(video.link).trim(),
+            description: String(video.description || "Video educativo relevante").trim()
+          })) || []
       };
-      
-      return res.json(cleanRecommendations);
-    } catch (parseError) {
-      console.error("Error parsing response:", parseError);
-      return res.json(DEFAULT_RECOMMENDATIONS);
+
+      if (cleanRecommendations.books.length === 0 || cleanRecommendations.videos.length === 0) {
+        throw new Error("No valid recommendations found");
+      }
+
+      // Validar enlaces
+      const validatedRecommendations = await validateLinks(cleanRecommendations);
+
+      // Verificar si tenemos suficientes recomendaciones válidas
+      if (validatedRecommendations.books.length < 4 || validatedRecommendations.videos.length < 4) {
+        console.log('No hay suficientes enlaces válidos, intentando de nuevo...');
+        return generateRecommendations(retryCount + 1);
+      }
+
+      return validatedRecommendations;
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      return generateRecommendations(retryCount + 1);
     }
+  }
+
+  try {
+    const recommendations = await generateRecommendations();
+    return res.json(recommendations);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error final:', error);
     return res.json(DEFAULT_RECOMMENDATIONS);
   }
 });
