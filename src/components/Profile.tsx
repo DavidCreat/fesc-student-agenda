@@ -1,9 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { FaUser, FaEnvelope, FaGraduationCap, FaIdCard, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaGraduationCap, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import { authService } from '../services/auth/AuthService';
 
 export const Profile: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const user = useStore((state) => state.user);
+  const setUser = useStore((state) => state.setUser);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await authService.getCurrentUser();
+        if (userData) {
+          setUser(userData);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error al cargar datos del usuario:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [setUser]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -13,12 +41,23 @@ export const Profile: React.FC = () => {
     );
   }
 
+  const formatDate = (date: string | Date | undefined) => {
+    if (!date) return 'No disponible';
+    return new Date(date).toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="space-y-8">
       {/* Encabezado del perfil */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Perfil del Estudiante</h1>
-        <p className="text-gray-600">Gestiona tu información personal y académica</p>
+        <p className="text-gray-600">Información personal y académica</p>
       </div>
 
       {/* Tarjeta principal de información */}
@@ -31,7 +70,7 @@ export const Profile: React.FC = () => {
           </div>
           <div className="text-center mt-4">
             <h2 className="text-2xl font-bold text-white">{user.fullName}</h2>
-            <p className="text-red-100">Estudiante Activo</p>
+            <p className="text-red-100">Estudiante {user.schedule === 'day' ? 'Diurno' : 'Nocturno'}</p>
           </div>
         </div>
 
@@ -50,18 +89,10 @@ export const Profile: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <FaIdCard className="h-5 w-5 text-red-500" />
-                <div>
-                  <p className="text-sm text-gray-500">Identificación</p>
-                  <p className="text-gray-900">{user.studentId || 'No disponible'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
                 <FaClock className="h-5 w-5 text-red-500" />
                 <div>
                   <p className="text-sm text-gray-500">Último Acceso</p>
-                  <p className="text-gray-900">{new Date().toLocaleDateString('es-CO')}</p>
+                  <p className="text-gray-900">{formatDate(new Date())}</p>
                 </div>
               </div>
             </div>
@@ -82,22 +113,20 @@ export const Profile: React.FC = () => {
                 <FaCalendarAlt className="h-5 w-5 text-red-500" />
                 <div>
                   <p className="text-sm text-gray-500">Semestre Actual</p>
-                  <p className="text-gray-900">{user.semester || 'No especificado'}</p>
+                  <p className="text-gray-900">{user.semester ? `${user.semester}° Semestre` : 'No especificado'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <FaCalendarAlt className="h-5 w-5 text-red-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Fecha de Registro</p>
+                  <p className="text-gray-900">{formatDate(user.createdAt)}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Acciones */}
-      <div className="flex justify-end space-x-4 mt-6">
-        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-          Editar Perfil
-        </button>
-        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
-          Cambiar Contraseña
-        </button>
       </div>
     </div>
   );

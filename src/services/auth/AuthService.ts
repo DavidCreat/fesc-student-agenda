@@ -6,8 +6,10 @@ export class AuthService {
   private baseURL = '/api/auth';
 
   private setAuthToken(token: string) {
+    console.log('Guardando token:', token);
     localStorage.setItem('token', token);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('Headers configurados:', api.defaults.headers.common);
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -46,10 +48,13 @@ export class AuthService {
 
   async getCurrentUser(): Promise<User | null> {
     const token = localStorage.getItem('token');
+    console.log('Token actual:', token);
     if (!token) return null;
 
     try {
+      console.log('Haciendo petición a /me con token');
       const { data } = await api.get<User>(`${this.baseURL}/me`);
+      console.log('Respuesta de /me:', data);
       return data;
     } catch (error) {
       console.error('Error getting current user:', error);

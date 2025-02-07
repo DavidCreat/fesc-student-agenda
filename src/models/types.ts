@@ -6,6 +6,7 @@ export interface User {
   career: string;
   semester: number;
   schedule: 'day' | 'night';
+  createdAt: string;
 }
 
 export interface ScheduleEntry {
