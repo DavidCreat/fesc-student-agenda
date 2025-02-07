@@ -11,10 +11,15 @@ import { Dashboard } from '@components/Dashboard';
 import { Navigation } from '@components/Navigation';
 import { Profile } from '@components/Profile';
 import { Schedule } from '@components/Schedule';
+
 import { Tasks } from '@components/Tasks';
 import { Session } from '@components/Session';
 import { Reports } from '@components/Reports';
 import ErrorBoundary from '@components/ErrorBoundary';
+import { Reports } from '@components/Reports';
+import ErrorBoundary from '@components/ErrorBoundary';
+import { RecommendationSystem } from '@components/RecommendationSystem';
+
 import { Toaster } from '@components/common/Toaster';
 
 const queryClient = new QueryClient({
@@ -25,6 +30,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+
 
 const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ProtectedRoute>
@@ -39,6 +45,8 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   </ProtectedRoute>
 );
 
+
+
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -51,7 +59,7 @@ const App: React.FC = () => {
               <Route path="/login" element={<AuthPage />} />
               <Route path="/register" element={<AuthPage />} />
               <Route path="/" element={<Navigate to="/login" replace />} />
-              
+
               {/* Protected Routes */}
               <Route path="/dashboard" element={
                 <ProtectedLayout>
@@ -87,6 +95,46 @@ const App: React.FC = () => {
                 <ProtectedLayout>
                   <Reports />
                 </ProtectedLayout>
+              {/* Protected Routes - Only show Navigation for these routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <>
+                    <Navigation />
+                    <div className="p-4">
+                      <Dashboard studentId="default" />
+                    </div>
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <>
+                    <Navigation />
+                    <div className="p-4">
+                      <Profile />
+                    </div>
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/schedule" element={
+                <ProtectedRoute>
+                  <>
+                    <Navigation />
+                    <div className="p-4">
+                      <Schedule />
+                    </div>
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <>
+                    <Navigation />
+                    <div className="p-4">
+                      <Reports />
+                    </div>
+                  </>
+                </ProtectedRoute>
               } />
               
               {/* Catch all route */}
