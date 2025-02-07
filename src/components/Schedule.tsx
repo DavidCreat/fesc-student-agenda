@@ -107,6 +107,7 @@ export const Schedule: React.FC = () => {
       const end = new Date(`2000-01-01T${newEnd}`);
 
       return (start < existingEnd && end > existingStart);
+
     });
   };
 

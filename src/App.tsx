@@ -56,6 +56,7 @@ const App: React.FC = () => {
               <Route path="/dashboard" element={
                 <ProtectedLayout>
                   <DashboardPage />
+
                 </ProtectedLayout>
               } />
               
