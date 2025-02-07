@@ -51,28 +51,6 @@ class ReportsService {
       throw new Error(error.response?.data?.message || 'Error al obtener los reportes');
     }
   }
-
-  async exportReport(): Promise<Blob> {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No autorizado');
-      }
-
-      console.log('Exportando reporte...');
-      const response = await api.get(`${this.baseURL}/export`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        responseType: 'blob'
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Error exporting report:', error);
-      throw new Error('Error al exportar el reporte');
-    }
-  }
 }
 
 export const reportsService = new ReportsService();

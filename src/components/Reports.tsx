@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaChartBar, FaClock, FaCheckCircle, FaBook, FaDownload } from 'react-icons/fa';
+import { FaChartBar, FaClock, FaCheckCircle, FaBook } from 'react-icons/fa';
 import { reportsService, ReportData } from '../services/reports/ReportsService';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
@@ -69,23 +69,6 @@ export const Reports: React.FC = () => {
     return null;
   }
 
-  const handleExportReport = async () => {
-    try {
-      const blob = await reportsService.exportReport();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'reporte-academico.pdf';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error al exportar el reporte:', error);
-      setError('Error al exportar el reporte');
-    }
-  };
-
   return (
     <div className="space-y-8">
       {/* Encabezado */}
@@ -94,13 +77,6 @@ export const Reports: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Reportes y Estadísticas</h1>
           <p className="text-gray-600 mt-1">Visualiza tu progreso académico</p>
         </div>
-        <button 
-          onClick={handleExportReport}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center"
-        >
-          <FaDownload className="mr-2" />
-          Exportar Reporte
-        </button>
       </div>
 
       {/* Tarjetas de resumen */}
