@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CAREERS } from '../constants/careers';
+import { CAREERS } from '../constants/careers.js';
 
 // Basic validators
 export const emailValidator = z

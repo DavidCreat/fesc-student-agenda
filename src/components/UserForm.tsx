@@ -1,7 +1,6 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
-import { User } from '../models/types';
-import { useStore } from '../store/useStore';
+import { User } from '../models/types.js';
+import { useStore } from '../store/useStore.js';
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <div className="mt-2 flex items-center bg-red-50 border-l-4 border-red-500 p-2 rounded">

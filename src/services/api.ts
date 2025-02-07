@@ -1,23 +1,60 @@
-import { HUGGINGFACE_TOKEN, HUGGINGFACE_API_URL } from '../config';
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import { clientConfig, clientConstants } from '../config/client-config.js';
 
-export const fetchRecommendations = async (subjects: string[]) => {
-  try {
-    const response = await fetch(HUGGINGFACE_API_URL, {
-      method: 'POST',
+class ApiService {
+  private static instance: ApiService;
+  private api: AxiosInstance;
+
+  private constructor() {
+    this.api = axios.create({
+      baseURL: clientConfig.apiBaseUrl,
+      timeout: clientConstants.API_TIMEOUT,
       headers: {
-        'Authorization': `Bearer ${HUGGINGFACE_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        inputs: subjects.join(', '),
-        parameters: {
-          candidate_labels: ['books', 'articles', 'videos', 'courses']
-        }
-      }),
+        'Content-Type': 'application/json'
+      }
     });
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching recommendations:', error);
-    return [];
+
+    this.setupInterceptors();
   }
-};
+
+  public static getInstance(): ApiService {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
+    }
+    return ApiService.instance;
+  }
+
+  private setupInterceptors() {
+    // Request interceptor
+    this.api.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem(clientConstants.AUTH_TOKEN_KEY);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor
+    this.api.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem(clientConstants.AUTH_TOKEN_KEY);
+          localStorage.removeItem(clientConstants.USER_KEY);
+          window.location.href = '/auth/login';
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  public getAxiosInstance(): AxiosInstance {
+    return this.api;
+  }
+}
+
+export const apiService = ApiService.getInstance();
+export const api = apiService.getAxiosInstance();

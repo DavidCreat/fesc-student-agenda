@@ -6,13 +6,12 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+export default class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false,
-    error: null,
+    hasError: false
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -20,24 +19,20 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Algo salió mal</h1>
-            <p className="text-gray-600 mb-4">
-              Lo sentimos, ha ocurrido un error. Por favor, intenta recargar la página.
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="max-w-xl p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">
+              Oops! Something went wrong.
+            </h1>
+            <p className="text-gray-600">
+              {this.state.error?.message || 'An unexpected error occurred'}
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Recargar página
-            </button>
           </div>
         </div>
       );
