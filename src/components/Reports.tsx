@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Reports = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto bg-white rounded-lg shadow-md">

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../api/axios';
 import { User } from '../../models/types';
 import { LoginCredentials, RegisterData, AuthResponse } from './types';
 
@@ -7,25 +7,39 @@ export class AuthService {
 
   private setAuthToken(token: string) {
     localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const { data } = await axios.post<AuthResponse>(`${this.baseURL}/login`, credentials);
-      this.setAuthToken(data.token);
+      console.log('Making login request to:', `${this.baseURL}/login`);
+      console.log('With credentials:', credentials);
+      const { data } = await api.post<AuthResponse>(`${this.baseURL}/login`, credentials);
+      console.log('Login response data:', data);
+      if (data.token) {
+        this.setAuthToken(data.token);
+      }
       return data;
     } catch (error: any) {
+      console.error('Login error:', error);
+      console.error('Login error response:', error.response);
       throw new Error(error.response?.data?.message || 'Error al iniciar sesión');
     }
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const { data } = await axios.post<AuthResponse>(`${this.baseURL}/register`, userData);
-      this.setAuthToken(data.token);
+      console.log('Making registration request to:', `${this.baseURL}/register`);
+      console.log('With data:', { ...userData, password: '[REDACTED]' });
+      const { data } = await api.post<AuthResponse>(`${this.baseURL}/register`, userData);
+      console.log('Registration successful');
+      if (data.token) {
+        this.setAuthToken(data.token);
+      }
       return data;
     } catch (error: any) {
+      console.error('Registration error:', error);
+      console.error('Registration error response:', error.response);
       throw new Error(error.response?.data?.message || 'Error al registrar usuario');
     }
   }
@@ -35,7 +49,7 @@ export class AuthService {
     if (!token) return null;
 
     try {
-      const { data } = await axios.get<User>(`${this.baseURL}/me`);
+      const { data } = await api.get<User>(`${this.baseURL}/me`);
       return data;
     } catch (error) {
       this.logout();
@@ -45,10 +59,16 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return !!this.getToken();
   }
 }
+
+export const authService = new AuthService();

@@ -1,44 +1,63 @@
-import axios from 'axios';
-import { config } from '../config';
+import { HfInference } from '@huggingface/inference';
+import { clientConfig } from '../config/client-config.js';
 
-interface RecommendationResponse {
+const getToken = () => {
+  if (typeof window === 'undefined') {
+    return process.env.VITE_HUGGINGFACE_TOKEN;
+  }
+  return clientConfig.huggingFaceToken;
+};
+
+const hf = new HfInference(getToken());
+
+export interface ClassificationResult {
   labels: string[];
   scores: number[];
   sequence: string;
 }
 
-export const getRecommendations = async (subjects: string[]) => {
+export const classifyText = async (text: string, labels: string[]): Promise<ClassificationResult> => {
   try {
-    const response = await axios.post<RecommendationResponse>(
-      'https://api-inference.huggingface.co/models/facebook/bart-large-mnli',
-      {
-        inputs: subjects.join(', '),
-        parameters: {
-          candidate_labels: [
-            'libros de programación',
-            'libros de diseño',
-            'libros de negocios',
-            'libros de administración',
-            'recursos en línea',
-            'cursos virtuales'
-          ]
-        }
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${config.huggingFaceToken}`,
-          'Content-Type': 'application/json',
-        }
-      }
-    );
+    const result = await hf.zeroShotClassification({
+      model: 'facebook/bart-large-mnli',
+      inputs: text,
+      parameters: { candidate_labels: labels }
+    });
 
-    return response.data.labels.map((label, index) => ({
-      type: label,
-      confidence: response.data.scores[index],
-      recommendation: `Recomendación para ${label}`
-    }));
+    return {
+      labels: result.labels,
+      scores: result.scores,
+      sequence: result.sequence
+    };
   } catch (error) {
-    console.error('Error fetching recommendations:', error);
-    throw new Error('No se pudieron obtener las recomendaciones');
+    console.error('Error in text classification:', error);
+    throw new Error('Failed to classify text');
+  }
+};
+
+export const generateRecommendations = async (
+  career: string,
+  semester: number,
+  interests: string[]
+): Promise<string[]> => {
+  try {
+    const prompt = `Generate learning resources for a ${career} student in semester ${semester} interested in ${interests.join(', ')}`;
+    
+    const result = await hf.textGeneration({
+      model: 'facebook/bart-large-mnli',
+      inputs: prompt,
+      parameters: {
+        max_length: 100,
+        num_return_sequences: 3,
+        temperature: 0.7
+      }
+    });
+
+    return Array.isArray(result) 
+      ? result.map(r => r.generated_text)
+      : [result.generated_text];
+  } catch (error) {
+    console.error('Error generating recommendations:', error);
+    throw new Error('Failed to generate recommendations');
   }
 };

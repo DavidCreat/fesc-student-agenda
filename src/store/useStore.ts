@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, ScheduleEntry, Task, TaskFormData } from '../models/types';
-import { api } from '../lib/api';
+import { User, ScheduleEntry, Task, TaskFormData } from '../models/types.js';
+import { api } from '../lib/api.js';
 
 interface Store {
   user: User | null;
+  isAuthenticated: boolean;
   schedules: ScheduleEntry[] | null;
   tasks: Task[];
   sessionStartTime: number | null;
@@ -23,10 +24,11 @@ export const useStore = create<Store>()(
   persist(
     (set) => ({
       user: null,
+      isAuthenticated: false,
       schedules: [],
       tasks: [],
       sessionStartTime: null,
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
       setSchedules: (schedules) => set({ schedules }),
       setTasks: (tasks) => set({ tasks }),
       startSession: () => set({ sessionStartTime: Date.now() }),

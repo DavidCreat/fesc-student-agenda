@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { CAREERS } from '../constants/careers';
+import bcrypt from 'bcrypt';
+import chalk from 'chalk';
+import { CAREERS } from '../constants/careers.js';
 
 interface IUser extends mongoose.Document {
   fullName: string;
@@ -22,10 +23,9 @@ const userSchema = new mongoose.Schema<IUser>({
   email: {
     type: String,
     required: [true, 'El correo es requerido'],
-    unique: true,
     lowercase: true,
     trim: true,
-    match: [/^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/, 'Debe ser un correo institucional @fesc.edu.co']
+    match: [/^est_[a-z0-9_]+@fesc\.edu\.co$/, 'El correo debe tener el formato est_nombre_apellido@fesc.edu.co']
   },
   password: {
     type: String,
@@ -60,17 +60,45 @@ const userSchema = new mongoose.Schema<IUser>({
   collection: 'users'
 });
 
+// Create a unique index on the email field
+userSchema.index({ email: 1 }, { unique: true });
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  try {
+    // Use the same bcrypt version ($2a$) as the stored hash
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
 });
 
 // Method to check password
 userSchema.methods.matchPassword = async function(enteredPassword: string) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  try {
+    if (!this.password) {
+      console.error(chalk.red('└── ❌ No se encontró contraseña para el usuario'));
+      return false;
+    }
+    
+    console.log(chalk.yellow('├── 🔑 Verificando contraseña'));
+    const isMatch = await bcrypt.compare(enteredPassword, this.password);
+    
+    if (isMatch) {
+      console.log(chalk.green('├── ✅ Contraseña correcta'));
+    } else {
+      console.log(chalk.red('├── ❌ Contraseña incorrecta'));
+    }
+    
+    return isMatch;
+  } catch (error) {
+    console.error(chalk.red('├── ❌ Error al comparar contraseñas:'), error);
+    throw error;
+  }
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);

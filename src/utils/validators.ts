@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { CAREERS } from '../constants/careers';
+import { CAREERS } from '../constants/careers.js';
 
 // Basic validators
 export const emailValidator = z
   .string()
   .email('Formato de correo inválido')
-  .regex(/^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/, 'Debe ser un correo institucional @fesc.edu.co');
+  .regex(/^[a-zA-Z0-9._%+-]+@fesc\.edu\.co$/, 'Por favor usa tu correo @fesc.edu.co');
 
 export const passwordValidator = z
   .string()

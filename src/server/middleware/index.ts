@@ -1,1 +1,0 @@
-export { protect } from './auth'; 

@@ -1,65 +1,61 @@
 export interface User {
-  _id: string;
-  fullName: string;
+  id: string;
   email: string;
+  fullName: string;
+  studentId: string;
   career: string;
   semester: number;
   schedule: 'day' | 'night';
 }
 
 export interface ScheduleEntry {
-  _id?: string;
+  _id: string;
   userId: string;
   subject: string;
   professor: string;
   room: string;
   dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
-  startTime: string; // formato "HH:mm"
-  endTime: string; // formato "HH:mm"
-  semester: number;
-  career: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateScheduleEntryDTO {
-  subject: string;
-  professor: string;
-  room: string;
-  dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'; // Ensure this matches
   startTime: string;
   endTime: string;
   semester: number;
-  userId?: string; // Optional for creation
-  career?: string; // Add this if needed
+  career: string;
 }
 
 export interface Task {
   _id: string;
   userId: string;
   title: string;
-  description: string;
+  description?: string;
   subject: string;
   completed: boolean;
   dueDate: string;
-  createdAt: string;
   priority: 'low' | 'medium' | 'high';
+  createdAt: string;
 }
+
+export type TaskFormData = Omit<Task, '_id' | 'userId' | 'createdAt' | 'completed'>;
 
 export interface SessionLog {
   _id: string;
   userId: string;
-  startTime: string; // or Date
-  duration: number; // in minutes
-  // Add any other relevant fields
+  startTime: string;
+  endTime: string;
+  duration: number;
+  subject: string;
+  notes?: string;
 }
 
 export interface Recommendation {
+  id: string;
   title: string;
-  type: string;
-  url: string;
+  description: string;
+  type: 'book' | 'article' | 'video' | 'course';
+  url?: string;
+  source: string;
+  relevanceScore: number;
+  tags: string[];
+  career?: string;
+  semester?: number;
+  createdAt: string;
+  updatedAt: string;
 }
-
-export type TaskFormData = Omit<Task, '_id' | 'userId' | 'createdAt'> & {
-  completed: boolean;
-};

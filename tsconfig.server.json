@@ -1,14 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "outDir": "dist",
-    "noEmit": false,
-    "baseUrl": ".",
-    "paths": {
-      "*": ["src/*"]
-    }
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "outDir": "dist/server",
+    "noEmit": false
   },
-  "include": ["src/server/**/*", "src/models/**/*", "src/config/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["server/**/*"],
+  "exclude": ["src/**/*", "node_modules"]
 } 

@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Navigation } from '../components/Navigation';
-import { Dashboard } from '../components/Dashboard';
-import { SchedulePage } from '../pages/SchedulePage';
-import { TasksPage } from '../pages/TasksPage';
-import { AuthPage } from '../pages/AuthPage';
-import { Profile } from '../components/Profile';
-import { Reports } from '../components/Reports';
-import { SessionPage } from '../pages/SessionPage';
-import { useAuthState } from '../hooks/auth';
+import { Navigation } from '../components/Navigation.js';
+import { Dashboard } from '../components/Dashboard.js';
+import { SchedulePage } from '../pages/SchedulePage.js';
+import { TasksPage } from '../pages/TasksPage.js';
+import { AuthPage } from '../pages/AuthPage.js';
+import { Profile } from '../components/Profile.js';
+import { Reports } from '../components/Reports.js';
+import { SessionPage } from '../pages/SessionPage.js';
+import { useAuthState } from '../hooks/auth.js';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthState();
@@ -31,7 +31,7 @@ export const AppRoutes = () => {
       <Navigation />
       <main className="container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/" element={<PrivateRoute><Dashboard studentId={user.studentId} /></PrivateRoute>} />
           <Route path="/schedule" element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
           <Route path="/tasks" element={<PrivateRoute><TasksPage /></PrivateRoute>} />
           <Route path="/session" element={<PrivateRoute><SessionPage /></PrivateRoute>} />
