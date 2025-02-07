@@ -52,8 +52,23 @@ export class AuthService {
       const { data } = await api.get<User>(`${this.baseURL}/me`);
       return data;
     } catch (error) {
-      this.logout();
+      console.error('Error getting current user:', error);
       return null;
+    }
+  }
+
+  async verifyToken(): Promise<User | null> {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      const { data } = await api.get<User>(`${this.baseURL}/verify`);
+      return data;
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      localStorage.removeItem('token');
+      delete api.defaults.headers.common['Authorization'];
+      throw error;
     }
   }
 
