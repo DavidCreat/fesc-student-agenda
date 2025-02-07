@@ -7,6 +7,7 @@ import { TaskForm } from './forms/TaskForm';
 import { ScheduleForm } from './forms/ScheduleForm';
 import { useNavigate } from 'react-router-dom';
 import { dashboardService } from '../services/dashboard/DashboardService';
+import { Recommendations } from './Recommendations';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -282,6 +283,15 @@ export const Dashboard: React.FC = () => {
               <span className="text-sm font-medium text-gray-700">Mi Perfil</span>
             </button>
           </div>
+        </div>
+
+        {/* Recommendations Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Recomendaciones Personalizadas</h2>
+          <Recommendations 
+            career={user?.career || ''} 
+            semester={user?.semester || 1} 
+          />
         </div>
 
         {/* Modals */}

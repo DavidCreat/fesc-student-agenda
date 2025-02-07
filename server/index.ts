@@ -11,6 +11,7 @@ import { User } from '../src/models/User';
 import { SessionLog } from '../src/models/SessionLog'; 
 import { Task } from '../src/models/Task';
 import { ScheduleEntry } from '../src/models/ScheduleEntry';
+import { HfInference } from "@huggingface/inference";
 
 // Load environment variables
 dotenv.config();
@@ -32,6 +33,8 @@ const DEFAULT_PORT = 5000;
 let PORT = parseInt(process.env.VITE_PORT || DEFAULT_PORT.toString(), 10);
 const MONGODB_URI = process.env.VITE_MONGODB_URI;
 const JWT_SECRET = process.env.VITE_JWT_SECRET || 'your-secret-key' as string;
+
+const inference = new HfInference(process.env.VITE_HUGGINGFACE_TOKEN);
 
 const findAvailablePort = (startPort: number): Promise<number> => {
   return new Promise((resolve, reject) => {
@@ -56,6 +59,100 @@ const findAvailablePort = (startPort: number): Promise<number> => {
 
 app.use(cors());
 app.use(express.json());
+
+// Recommendations endpoint
+app.post('/api/recommendations/generate', async (req, res) => {
+  const { career, semester } = req.body;
+  console.log('Generating recommendations for:', { career, semester });
+
+  const systemPrompt = `Eres un experto en educación que recomienda recursos de aprendizaje. Proporciona recomendaciones específicas y relevantes.`;
+  const userPrompt = `Necesito 3 recomendaciones de libros y 3 videos educativos para un estudiante de ${career} en el semestre ${semester}. Los libros deben ser relevantes para su nivel académico y la carrera. Los videos deben ser tutoriales o cursos específicos que le ayuden en su formación. Responde SOLO en formato JSON con la siguiente estructura exacta:
+  {
+    "books": [
+      {"title": "título del libro", "link": "enlace real de amazon al libro", "description": "descripción breve"}
+    ],
+    "videos": [
+      {"title": "título del video", "link": "enlace real de youtube al video", "description": "descripción breve"}
+    ]
+  }`;
+
+  try {
+    const chatCompletion = await inference.chatCompletion({
+      model: "deepseek-ai/DeepSeek-R1",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        {
+          role: "user",
+          content: userPrompt
+        }
+      ],
+      provider: "together",
+      max_tokens: 1000,
+      temperature: 0.7
+    });
+
+    console.log('Raw API response:', chatCompletion);
+
+    try {
+      const generatedText = chatCompletion.choices?.[0]?.message?.content;
+      if (!generatedText) {
+        console.error("No generated text in response");
+        return res.json(DEFAULT_RECOMMENDATIONS);
+      }
+      console.log('Generated text:', generatedText);
+
+      // Extraer solo la parte JSON de la respuesta
+      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON found in response");
+      }
+      
+      const recommendations = JSON.parse(jsonMatch[0]);
+      
+      // Validar y limpiar las recomendaciones
+      const cleanRecommendations = {
+        books: recommendations.books?.slice(0, 3).map(book => ({
+          title: book.title || "Libro recomendado",
+          link: book.link || "https://www.amazon.com",
+          description: book.description || "Libro relevante para tu carrera"
+        })) || DEFAULT_RECOMMENDATIONS.books,
+        videos: recommendations.videos?.slice(0, 3).map(video => ({
+          title: video.title || "Video recomendado",
+          link: video.link || "https://www.youtube.com",
+          description: video.description || "Video educativo relevante"
+        })) || DEFAULT_RECOMMENDATIONS.videos
+      };
+      
+      return res.json(cleanRecommendations);
+    } catch (parseError) {
+      console.error("Error parsing response:", parseError);
+      return res.json(DEFAULT_RECOMMENDATIONS);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return res.json(DEFAULT_RECOMMENDATIONS);
+  }
+});
+
+const DEFAULT_RECOMMENDATIONS = {
+  books: [
+    {
+      title: "Introducción a la carrera",
+      link: "https://www.amazon.com/",
+      description: "Libro básico recomendado para el semestre"
+    }
+  ],
+  videos: [
+    {
+      title: "Fundamentos básicos",
+      link: "https://www.youtube.com/",
+      description: "Video introductorio recomendado"
+    }
+  ]
+};
 
 app.use((req, res, next) => {
   res.setHeader(
